@@ -1,0 +1,830 @@
+
+"""
+
+---
+**Note:**
+- Data paths and sensitive details are removed for sharing.
+
+"""
+
+#!/usr/bin/env python3
+
+# ====================== IMPORTS ======================
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
+import os
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split, StratifiedKFold, cross_validate
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.svm import LinearSVC
+from sklearn.pipeline import Pipeline
+from sklearn.feature_selection import SelectFromModel
+from sklearn.metrics import (confusion_matrix, classification_report, ConfusionMatrixDisplay,
+                             make_scorer, accuracy_score, precision_score, 
+                             recall_score, f1_score)
+from sklearn.base import clone
+from sklearn.preprocessing import (
+    StandardScaler,
+    QuantileTransformer,
+    RobustScaler,
+    PowerTransformer,
+    FunctionTransformer
+)
+from scipy.stats import t
+import matplotlib.pyplot as plt
+import seaborn as sns
+import re
+
+
+# ==========================================================
+# PREPROCESSING PIPELINES
+# ==========================================================
+epsilon = 1e-10
+
+def clr_transform(X):
+    X = np.asarray(X)
+    log_X = np.log(X + epsilon)
+    geometric_mean = np.exp(np.mean(log_X, axis=1, keepdims=True))
+    return log_X - np.log(geometric_mean)
+
+def signed_log_transform(X):
+    X = np.asarray(X)
+    return np.sign(X) * np.log1p(np.abs(X))
+
+def get_preprocessing_pipeline(method):
+    if method == "zscore":
+        return Pipeline([
+            ("scaler", StandardScaler())
+        ])
+    elif method == "quantile":
+        return Pipeline([
+            ("transform", QuantileTransformer(
+                output_distribution="normal",
+                random_state=42))
+        ])
+    elif method == "log_robust":
+        return Pipeline([
+            ("log", FunctionTransformer(np.log1p, validate=False)),
+            ("scaler", RobustScaler())
+        ])
+    elif method == "yeojohnson":
+        return Pipeline([
+            ("transform", PowerTransformer(
+                method="yeo-johnson",
+                standardize=True))
+        ])
+    elif method == "clr":
+        return Pipeline([
+            ("clr", FunctionTransformer(
+                clr_transform,
+                validate=False)),
+            ("scaler", StandardScaler())
+        ])
+    elif method == "signedlog":
+        return Pipeline([
+            ("signedlog", FunctionTransformer(
+                signed_log_transform,
+                validate=False)),
+            ("scaler", StandardScaler())
+        ])
+    else:
+        raise ValueError(f"Unknown preprocessing: {method}")
+
+# ----------------------------------------------------------
+# CHOOSE THE PREPROCESSING METHOD HERE
+# ----------------------------------------------------------
+STANDARDISATION = "zscore"  # "zscore", "quantile", "log_robust", "yeojohnson", "clr", "signedlog"
+PREPROCESSOR = get_preprocessing_pipeline(STANDARDISATION)
+print(f"Using preprocessing: {STANDARDISATION}")
+
+
+# ====================== DIRECTORIES ======================
+
+RES_DIR = "/scratch/solankin/MUC1/results/reRun2/10_3sim2Dipc100Hapc200Unmerged_FullBin_N75_OOF_ZScoreC_31"
+os.makedirs(RES_DIR, exist_ok=True)
+DATA = "/scratch/solankin/MUC1/data/KMC/sim2/sim2c200UnmergedDip/sim2c100Hapc200UnmergedDip31.csv.xz"
+FILEPATH = "/scratch/solankin/MUC1/data/KMC/sim2/"
+
+print("Dataset: ", DATA)
+print("Result directory: ", RES_DIR)
+
+
+# ====================== 1. DATA PREP ======================
+df = pd.read_csv(DATA, compression="xz")
+print("Shape of the dataset:", df.shape)
+print("Number of samples in the dataset:", len(df["ID"].unique()))
+
+assert df.isnull().sum().sum() == 0, "Missing values found in the dataset!"
+assert df.duplicated().sum() == 0, "Duplicates found in the dataset!"
+
+df_pos = df[df["type"]=="pos"]
+df_neg = df[df["type"]=="neg"]
+
+print("Number of negative samples in the original data:",len(df_neg["ID"].unique()))
+print("Number of positive samples in the original data:",len(df_pos["ID"].unique()))
+
+# Pivot to wide format
+df_wide = pd.pivot_table(df, index=["ID", "type"], columns=["kmer_seq"], values="count", fill_value=0).reset_index()
+print(f"Shape of the dataset after pivot: {df_wide.shape}")
+
+df_wide = df_wide[df_wide['ID'] != 'NIST']
+print(f"Shape of the pivot dataset after removing 'NIST': {df_wide.shape}")
+
+
+##---------DATA FILTERATION---------##
+
+"""
+DATA FILTERATION FROM 100% TO 80%:
+ Data filteration so that 80% (AND NOT 100%) of the negative
+ offsprings share atleast one chromosome with positive offsprings.
+ 
+"""
+
+# 1. Load .txt file with patterns to remove
+with open(FILEPATH + '/True75/e_44PdipNegMat75.txt', 'r') as f:
+    patterns = [line.strip() for line in f]
+    
+print(f"Data containing the following IDs is to be removed:\n{patterns}")
+
+
+# 2. First filter: split into "pos" and "neg"
+df_wide_neg = df_wide[df_wide["type"] == "neg"]
+df_wide_pos = df_wide[df_wide["type"] == "pos"]
+
+# 3. Second filter: remove rows from "pos" data where "ID" contains any of the patterns
+column_name = 'ID'  
+filtered_pos = df_wide_pos[~df_wide_pos[column_name].str.contains('|'.join(patterns), na=False)]
+
+print(f"Shape of the positive data before filteration: {df_wide_pos.shape} and after filteration: {filtered_pos.shape}")
+
+# 4. Concatenate the filtered "pos" data with the df_sw_neg "neg" data
+final_df = pd.concat([filtered_pos, df_wide_neg], ignore_index=True)
+print(f"Shape of the final data: {final_df.shape}")
+
+# 5. Save the final DataFrame to a new .csv file
+#final_df.to_csv('/scratch/solankin/data/muc1_sim2/kmer_table/sim2c200UnmergedDip/sim2c200UnmergedDip75_31.csv', index=False)
+#final_df.to_csv('/scratch/solankin/data/muc1_sim2/kmer_table/sim2c200UnmergedDip/sim2c200UnmergedDip75_1_31.csv.xz', index=False, compression='xz')
+
+
+pos_df0 = final_df[final_df['type'] == 'pos']
+neg_df0 = final_df[final_df['type'] == 'neg']
+
+print(f"Shape of the positive samples in the final_df before filteration: {pos_df0.shape}")
+print(f"Shape of the negative samples in the final_df before filteration: {neg_df0.shape}")
+
+
+##---------STRATIFIED SPLIT OF FILTERED DATA---------##
+
+# 1. Load Predefined Groups from .txt Files
+# Load positive groups
+with open(FILEPATH + '/True75/mat_pos_44dipPosMat.txt', 'r') as f:
+    mat_pos_ids = set(line.strip() for line in f)
+
+with open(FILEPATH + '/True75/pat_pos_44dipPosPat.txt', 'r') as f:
+    pat_pos_ids = set(line.strip() for line in f)
+
+# Load negative groups
+with open(FILEPATH + '/True75/mat_neg_44PdipNegMat75.txt', 'r') as f:
+    mat_neg_ids = set(line.strip() for line in f)
+
+with open(FILEPATH + '/True75/pat_neg_44PdipNegPat.txt', 'r') as f:
+    pat_neg_ids = set(line.strip() for line in f)
+
+with open(FILEPATH + '/True75/mat_neg2_44NdipNegMat.txt', 'r') as f:
+    mat_neg2_ids = set(line.strip() for line in f)
+
+with open(FILEPATH + '/True75/pat_neg2_44NdipNegPat.txt', 'r') as f:
+    pat_neg2_ids = set(line.strip() for line in f)
+
+with open(FILEPATH + '/True75/e_44PdipNegMat75.txt', 'r') as f:
+    e_ids = set(line.strip() for line in f)
+    
+
+# 2. Assign Subgroup Labels to Each ID
+def assign_subgroup(id_str):
+    # Extract all GCA_XXXXXXXX.X from the ID
+    gcas = re.findall(r'GCA_\d+\.\d+', id_str)
+    if not gcas or len(gcas) != 2:
+        return 'unknown'
+
+    gca1, gca2 = gcas
+
+    # Determine subgroup for each GCA
+    sub1 = 'unknown'
+    if gca1 in mat_pos_ids: sub1 = 'mat_pos'
+    elif gca1 in pat_pos_ids: sub1 = 'pat_pos'
+    elif gca1 in e_ids: sub1 = 'e'
+    elif gca1 in mat_neg_ids: sub1 = 'mat_neg'
+    elif gca1 in pat_neg_ids: sub1 = 'pat_neg'
+    elif gca1 in mat_neg2_ids: sub1 = 'mat_neg2'
+    elif gca1 in pat_neg2_ids: sub1 = 'pat_neg2'
+
+    sub2 = 'unknown'
+    if gca2 in mat_pos_ids: sub2 = 'mat_pos'
+    elif gca2 in pat_pos_ids: sub2 = 'pat_pos'
+    elif gca2 in e_ids: sub2 = 'e'
+    elif gca2 in mat_neg_ids: sub2 = 'mat_neg'
+    elif gca2 in pat_neg_ids: sub2 = 'pat_neg'
+    elif gca2 in mat_neg2_ids: sub2 = 'mat_neg2'
+    elif gca2 in pat_neg2_ids: sub2 = 'pat_neg2'
+
+    if sub1 == 'unknown' or sub2 == 'unknown':
+        return 'unknown'
+    return f"{sub1}_{sub2}"
+
+final_df['subgroup'] = final_df['ID'].apply(assign_subgroup)
+print("First few IDs and their subgroups:")
+print(final_df[['ID', 'subgroup']].head())
+print("\nValue counts for subgroups:")
+print(final_df['subgroup'].value_counts(normalize=True))
+print("\nUnknown Labels:")
+print(final_df[final_df['subgroup'] == 'unknown'][['ID', 'subgroup']])
+
+
+print("\nAssign Subgroup Labels:",final_df['subgroup'].head)
+
+# 3. Separate Positive and Negative Samples
+pos_df = final_df[final_df['type'] == 'pos']
+neg_df = final_df[final_df['type'] == 'neg']
+
+# 4. Stratified Splitting
+# Negative Samples
+neg_trainval, neg_test = train_test_split(
+    neg_df, test_size=0.2, stratify=neg_df['subgroup'], random_state=42
+)
+neg_train, neg_val = train_test_split(
+    neg_trainval, test_size=0.25, stratify=neg_trainval['subgroup'], random_state=42
+)
+
+print("\nNegative train subgroup proportions:")
+print(neg_train['subgroup'].value_counts(normalize=True))
+print("\nNegative val subgroup proportions:")
+print(neg_val['subgroup'].value_counts(normalize=True))
+print("\nNegative test subgroup proportions:")
+print(neg_test['subgroup'].value_counts(normalize=True))
+
+# Positive Samples
+pos_trainval, pos_test = train_test_split(
+    pos_df, test_size=0.2, stratify=pos_df['subgroup'], random_state=42
+)
+pos_train, pos_val = train_test_split(
+    pos_trainval, test_size=0.25, stratify=pos_trainval['subgroup'], random_state=42
+)
+
+print("\nPositive train subgroup proportions:")
+print(pos_train['subgroup'].value_counts(normalize=True))
+print("\nPositive val subgroup proportions:")
+print(pos_val['subgroup'].value_counts(normalize=True))
+print("\nPositive test subgroup proportions:")
+print(pos_test['subgroup'].value_counts(normalize=True))
+
+
+##---------OUT OF THE FAMILY DATASET (NEGATIVE)------##
+
+# 1. Read OOF simulated data
+oof_df = pd.read_csv(FILEPATH + "/sim2c200UnmergedDipAllVsAll_Neg/sim2c100Hapc200UnmergedDipAllVsAll_Neg31.csv.xz", compression="xz")
+
+print("Shape of the OOF data:",oof_df.shape)
+print("Number of samples in the OOF dataset:",len(oof_df["ID"].unique()))
+
+# Split into "pos" and "neg"
+df_oof_neg = oof_df[oof_df["type"] == "neg"]
+df_oof_pos = oof_df[oof_df["type"] == "pos"]
+
+print(f"Shape of the negative OOF dataset before filteration: {df_oof_neg.shape}")
+print("Number of negative samples in the OOF dataset:",len(df_oof_neg["ID"].unique()))
+
+print(f"Shape of the positive OOF dataset before filteration: {df_oof_pos.shape}")
+print("Number of positive samples in the OOF dataset:",len(df_oof_pos["ID"].unique()))
+
+# Pivot to wide format
+df_off_wide = pd.pivot_table(oof_df, index=["ID", "type"], columns=[
+                           "kmer_seq"], values="count", fill_value=0).reset_index()
+print(f"Shape of the OFF data after pivot: {df_off_wide.shape}")
+
+df_off_wide = df_off_wide[df_off_wide['ID'] != 'NIST']
+print(f"Shape of the pivot OFF data after removing 'NIST': {df_off_wide.shape}")
+
+# 2. Assign Subgroup Labels to Each ID
+final_oof_df = df_off_wide.copy()
+
+final_oof_df['subgroup'] = final_oof_df['ID'].apply(assign_subgroup)
+print("First few IDs and their subgroups:")
+print(final_oof_df[['ID', 'subgroup']].head())
+print("\nValue counts for subgroups:")
+print(final_oof_df['subgroup'].value_counts(normalize=True))
+print("\nUnknown Labels:")
+print(final_oof_df[final_oof_df['subgroup'] == 'unknown'][['ID', 'subgroup']])
+
+# 3. Extract Positive and Negative Samples in OFF Data
+pos_oof_df = final_oof_df[final_oof_df['type'] == 'pos']
+neg_oof_df = final_oof_df[final_oof_df['type'] == 'neg']
+
+print("\nPositive subgroup proportions:")
+print(pos_oof_df['subgroup'].value_counts(normalize=True))
+print("\nNegative subgroup proportions:")
+print(neg_oof_df['subgroup'].value_counts(normalize=True))
+
+# Extract OFF negative samples
+neg_oof_df4t = neg_oof_df[neg_oof_df['subgroup'] == 'mat_neg2_pat_neg2']
+neg_oof_df4t
+print("\nNegative subgroup proportions in OFF after filteration:")
+print(neg_oof_df4t['subgroup'].value_counts(normalize=True))
+
+# Extract positive samples
+pos_oof_df4t = pos_oof_df.sample(frac=0.5, random_state=42) 
+pos_oof_df4t
+
+print("\nPositive subgroup proportions in OFF after filteration:")
+print(pos_oof_df4t['subgroup'].value_counts(normalize=True))
+
+print("Number of data categories in the pos_oof_df4t data:",len(pos_oof_df4t["type"].unique()))
+print("Number of data categories in the neg_oof_df4t data:",len(neg_oof_df4t["type"].unique()))
+
+
+##---------COMBINE OFF DATA TO BE USED AS TEST SET---##
+
+# Combine Splits and Prepare Features/Labels
+train_df = pd.concat([pos_train, neg_train])
+val_df = pd.concat([pos_val, neg_val])
+test_df = pd.concat([pos_oof_df4t, neg_oof_df4t])
+
+X_train = train_df.drop(['ID', 'type', 'subgroup'], axis=1)
+y_train = train_df['type']
+
+X_val = val_df.drop(['ID', 'type', 'subgroup'], axis=1)
+y_val = val_df['type']
+
+X_test = test_df.drop(['ID', 'type', 'subgroup'], axis=1)
+y_test = test_df['type']
+
+print("Raw Training data (N75) shape:", X_train.shape)
+print("Raw Validation data (N75) shape:", X_val.shape)
+print("Raw Testing data (OOF) shape:", X_test.shape)
+
+# ====================== 1.5. FEATURE ALIGNMENT ======================
+print(f"Number of features in training dataset before alignment: {len(X_train.columns)}")
+print(f"Number of features in test dataset before alignment: {len(X_test.columns)}")
+
+# Align features
+common_kmer_columns = X_train.columns.intersection(X_test.columns)
+print(f"Number of common k-mers: {len(common_kmer_columns)}")
+
+unique_to_X_train = X_train.columns.difference(X_test.columns)
+print(f"Number of features in X_train, not in X_test: {len(unique_to_X_train)}")
+
+selected_features = X_train.columns
+
+X_train = X_train[selected_features]
+#X_val = X_val[selected_features]
+X_val = X_val.reindex(columns=selected_features, fill_value=0)
+X_test = X_test.reindex(columns=selected_features, fill_value=0)
+
+assert list(X_train.columns) == list(X_test.columns), "Train and test feature order/columns do not match!"
+
+print("Raw Training data (N75) shape after alignment:", X_train.shape)
+print("Raw Validation data (N75) shape after alignment:", X_val.shape)
+print("Raw Testing data (OOF) shape after alignment:", X_test.shape)
+
+print(f"Number of 'positive' and 'negative' samples in the raw training data: {y_train.value_counts()}")
+print(f"Number of 'positive' and 'negative' samples in the raw validation data: {y_val.value_counts()}")
+print(f"Number of 'positive' and 'negative' samples in the raw testing data: {y_test.value_counts()}")
+
+
+# ====================== 2. BASELINE MODEL EVALUATION (FULL FEATURES) ======================
+# Define models
+modelscv = {
+    "Logistic Regression": Pipeline([
+        ("preprocessing", clone(PREPROCESSOR)),
+        ("classifier", LogisticRegression(solver="liblinear", class_weight="balanced", max_iter=1000, random_state=42))
+    ]),
+    "Decision Tree": Pipeline([
+        ("preprocessing", clone(PREPROCESSOR)),
+        ("classifier", DecisionTreeClassifier(random_state=42))
+    ]),
+    "Random Forest": Pipeline([
+        ("preprocessing", clone(PREPROCESSOR)),
+        ("classifier", RandomForestClassifier(random_state=42))
+    ]),
+    "LinearSVC": Pipeline([
+        ("preprocessing", clone(PREPROCESSOR)),
+        ("classifier", LinearSVC(max_iter=10000, random_state=42))
+    ])
+}
+
+# Define scoring metrics
+scoring = {
+    'accuracy': make_scorer(accuracy_score),
+    'precision': make_scorer(precision_score, average='macro'),
+    'recall': make_scorer(recall_score, average='macro'),
+    'f1': make_scorer(f1_score, average='macro')
+}
+
+# Define CV strategy
+skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+
+results = []
+summary_results = []
+
+for model_name, model in modelscv.items():
+    print(f"Evaluating {model_name}...")
+    cv_results = cross_validate(model, X_train, y_train, cv=skf, scoring=scoring)
+
+    for metric in scoring:
+        scores = cv_results[f"test_{metric}"]
+        for score in scores:
+            results.append({
+                "Classifier": model_name,
+                "Metric": metric.capitalize(),
+                "Score": score,
+                "Set": "CV"
+            })
+
+        mean = np.mean(scores)
+        std = np.std(scores, ddof=1)
+        n = len(scores)
+        ci95 = t.ppf(0.975, df=n-1) * std / np.sqrt(n)
+
+        summary_results.append({
+            "Classifier": model_name,
+            "Metric": metric.capitalize(),
+            "Mean": mean,
+            "Std": std,
+            "CI95": ci95
+        })
+
+    # Validation evaluation
+    model.fit(X_train, y_train)
+    y_val_pred = model.predict(X_val)
+    val_accuracy = accuracy_score(y_val, y_val_pred)
+    val_precision = precision_score(y_val, y_val_pred, average="macro")
+    val_recall = recall_score(y_val, y_val_pred, average="macro")
+    val_f1 = f1_score(y_val, y_val_pred, average="macro")
+
+    results.extend([
+        {"Classifier": model_name, "Metric": "Accuracy", "Score": val_accuracy, "Set": "Validation"},
+        {"Classifier": model_name, "Metric": "Precision", "Score": val_precision, "Set": "Validation"},
+        {"Classifier": model_name, "Metric": "Recall", "Score": val_recall, "Set": "Validation"},
+        {"Classifier": model_name, "Metric": "F1", "Score": val_f1, "Set": "Validation"}
+    ])
+
+# Convert to DataFrames and save as CSV
+results_df = pd.DataFrame(results)
+summary_df = pd.DataFrame(summary_results)
+
+results_df.to_csv(os.path.join(RES_DIR, "s2_cv_validation_results.csv"), index=False)
+summary_df.to_csv(os.path.join(RES_DIR, "s2_cv_summary_statistics.csv"), index=False)
+
+# --- PLOTS ---
+# 1. CV Results: Barplot (mean) + Stripplot (individual folds)
+cv_results_df = results_df[results_df['Set'] == 'CV']
+fig, ax = plt.subplots(figsize=(15, 8))
+sns.set(style="whitegrid")
+
+sns.barplot(data=cv_results_df, x="Classifier", y="Score", hue="Metric", ci=None, alpha=0.7, ax=ax)
+sns.stripplot(data=cv_results_df, x="Classifier", y="Score", hue="Metric", dodge=True, jitter=True, ax=ax, linewidth=1, marker="o", edgecolor="gray", alpha=0.4)
+
+handles, labels = ax.get_legend_handles_labels()
+n_metrics = cv_results_df["Metric"].nunique()
+ax.legend_.remove()
+ax.legend(handles[:n_metrics], labels[:n_metrics], loc="best", bbox_to_anchor=(1.02, 0.8), title="Metric")
+
+for bars in ax.containers:
+    ax.bar_label(bars, fmt="%.2f", label_type="edge", fontsize=10, padding=3)
+
+ax.set_title("Cross-Validation (k=5) Model Scores", fontsize=24)
+ax.set_xlabel("Classifier", fontsize=18)
+ax.set_ylabel("Score", fontsize=18)
+ax.tick_params(labelsize=14, rotation=45)
+sns.despine()
+
+plt.tight_layout()
+fig.savefig(os.path.join(RES_DIR, "s2_cv_classifier_barplot.png"), dpi=300)
+plt.show()
+plt.close(fig)
+
+# 2. Validation Results: Barplot
+val_results_df = results_df[results_df['Set'] == 'Validation']
+fig, ax = plt.subplots(figsize=(10, 6))
+sns.barplot(data=val_results_df, x="Classifier", y="Score", hue="Metric", ax=ax)
+ax.set_title("Validation Set Scores", fontsize=20)
+ax.set_xlabel("Classifier", fontsize=16)
+ax.set_ylabel("Score", fontsize=16)
+ax.tick_params(labelsize=12)
+sns.despine()
+plt.tight_layout()
+fig.savefig(os.path.join(RES_DIR, "s2_validation_barplot.png"), dpi=300)
+plt.show()
+plt.close(fig)
+
+# 3. Confusion Matrices
+fig, axes = plt.subplots(2, 2, figsize=(12, 12))
+axes = axes.ravel()
+
+for i, (model_name, model) in enumerate(modelscv.items()):
+    model.fit(X_train, y_train)
+    y_val_pred = model.predict(X_val)
+    ConfusionMatrixDisplay.from_predictions(y_val, y_val_pred, ax=axes[i], cmap='Blues')
+    axes[i].set_title(f"{model_name} Confusion Matrix (Validation)", fontsize=12)
+
+plt.tight_layout()
+fig.savefig(os.path.join(RES_DIR, "s2_all_models_validation_confusion_matrix.png"), dpi=300)
+plt.show()
+plt.close(fig)
+
+
+# ====================== 3. TEST SET EVALUATION (FULL FEATURES) ======================
+# ---------------------- (i) L2 PIPELINE 1 ----------------------
+l2_pipeline1 = Pipeline([
+    ("preprocessing", clone(PREPROCESSOR)),
+    ("classifier", LogisticRegression(solver="liblinear", class_weight="balanced", max_iter=1000, random_state=42))
+])
+l2_pipeline1.fit(X_train, y_train)
+y_test_pred_l2p1 = l2_pipeline1.predict(X_test)
+print("\nl2p1 classification report:\n", classification_report(y_test, y_test_pred_l2p1))
+report_dict = classification_report(y_test, y_test_pred_l2p1, output_dict=True)
+report_df = pd.DataFrame(report_dict).transpose()
+report_df.to_csv(os.path.join(RES_DIR, "s3_l2p1_testSet_classification_report.csv"))
+
+cm = confusion_matrix(y_test, y_test_pred_l2p1)
+disp = ConfusionMatrixDisplay(confusion_matrix=cm)
+disp.plot(cmap="Blues")
+plt.title("Confusion Matrix (Full Features)")
+plt.savefig(os.path.join(RES_DIR, "s3_l2p1_testSet_confusion_matrix.png"), dpi=300, bbox_inches='tight')
+plt.show()
+plt.close()
+
+
+# ====================== 4. FEATURE SELECTION (IF BASELINE IS GOOD) ======================
+feature_counts = sorted(list(set([50, 100, 200, 500, 750, 1000, 2000, 4000, 5000])))
+#feature_counts = sorted(list(set([50, 100, 200, 500, 750, 1000, 2000, 4000, 6000, 7000])))
+
+scoring = {
+    'accuracy': make_scorer(accuracy_score),
+    'precision': make_scorer(precision_score, average='macro'),
+    'recall': make_scorer(recall_score, average='macro'),
+    'f1': make_scorer(f1_score, average='macro')
+}
+
+results = []
+summary_results = []
+
+for n in feature_counts:
+    print(f"\nEvaluating top {n} features...")
+    pipeline = Pipeline([
+        ("preprocessing", clone(PREPROCESSOR)),
+        ("selector", SelectFromModel(
+            LogisticRegression(penalty="l2", solver="lbfgs", class_weight="balanced", C=0.8, max_iter=1000, random_state=42),
+            max_features=n
+        )),
+        ("classifier", LogisticRegression(solver="liblinear", class_weight="balanced", max_iter=1000, random_state=42))
+    ])
+
+    skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+    cv_results = cross_validate(pipeline, X_train, y_train, cv=skf, scoring=scoring)
+    cv_stats = {}
+
+    for metric in scoring:
+        scores = cv_results[f"test_{metric}"]
+        mean = np.mean(scores)
+        std = np.std(scores, ddof=1)
+        ci95 = t.ppf(0.975, len(scores)-1) * std / np.sqrt(len(scores))
+        cv_stats[metric] = mean
+        summary_results.append({
+            "n_features": n,
+            "Metric": metric,
+            "Mean": mean,
+            "Std": std,
+            "CI95": ci95
+        })
+
+    pipeline.fit(X_train, y_train)
+    y_val_pred = pipeline.predict(X_val)
+    val_accuracy = accuracy_score(y_val, y_val_pred)
+    val_precision = precision_score(y_val, y_val_pred, average="macro")
+    val_recall = recall_score(y_val, y_val_pred, average="macro")
+    val_f1 = f1_score(y_val, y_val_pred, average="macro")
+
+    results.append({
+        "n_features": n,
+        "mean_cv_train_accuracy": cv_stats["accuracy"],
+        "mean_cv_train_precision": cv_stats["precision"],
+        "mean_cv_train_recall": cv_stats["recall"],
+        "mean_cv_train_f1": cv_stats["f1"],
+        "validation_accuracy": val_accuracy,
+        "validation_precision": val_precision,
+        "validation_recall": val_recall,
+        "validation_f1": val_f1
+    })
+    print(f"{n:4d} features | CV Recall = {cv_stats['recall']:.3f} | Validation Recall = {val_recall:.3f}")
+
+results_df = pd.DataFrame(results)
+results_df.to_csv(os.path.join(RES_DIR, "s4_lr_cv_feature_selection_val_macro.csv"), index=False)
+summary_df = pd.DataFrame(summary_results)
+summary_df.to_csv(os.path.join(RES_DIR, "s4_lr_cv_summary_feature_selection_val_macro.csv"), index=False)
+
+# Plotting
+plt.figure(figsize=(16, 12))
+plt.subplot(2, 1, 1)
+plt.errorbar(
+    [r['n_features'] for r in results],
+    [r['mean_cv_train_accuracy'] for r in results],
+    label='CV Train Accuracy', marker='o', capsize=5
+)
+plt.errorbar(
+    [r['n_features'] for r in results],
+    [r['mean_cv_train_precision'] for r in results],
+    label='CV Train Precision', marker='o', capsize=5
+)
+plt.errorbar(
+    [r['n_features'] for r in results],
+    [r['mean_cv_train_recall'] for r in results],
+    label='CV Train Recall', marker='o', capsize=5
+)
+plt.errorbar(
+    [r['n_features'] for r in results],
+    [r['mean_cv_train_f1'] for r in results],
+    label='CV Train F1', marker='o', capsize=5
+)
+plt.xlabel('Number of Features', fontsize=12)
+plt.ylabel('Score', fontsize=12)
+plt.title('Cross-Validated Training Metrics vs. Number of Features', fontsize=14)
+plt.legend(fontsize=10)
+plt.grid(True)
+
+plt.subplot(2, 1, 2)
+plt.plot(
+    [r['n_features'] for r in results],
+    [r['validation_accuracy'] for r in results],
+    label='Validation Accuracy', marker='o'
+)
+plt.plot(
+    [r['n_features'] for r in results],
+    [r['validation_precision'] for r in results],
+    label='Validation Precision', marker='o'
+)
+plt.plot(
+    [r['n_features'] for r in results],
+    [r['validation_recall'] for r in results],
+    label='Validation Recall', marker='o'
+)
+plt.plot(
+    [r['n_features'] for r in results],
+    [r['validation_f1'] for r in results],
+    label='Validation F1', marker='o'
+)
+plt.xlabel('Number of Features', fontsize=12)
+plt.ylabel('Score', fontsize=12)
+plt.title('Validation Metrics vs. Number of Features', fontsize=14)
+plt.legend(fontsize=10)
+plt.grid(True)
+
+plt.tight_layout()
+plt.savefig(os.path.join(RES_DIR, "s4_lr_cv_feature_selection_all_metrics.png"), dpi=300)
+plt.show()
+plt.close()
+
+best_result = max(results, key=lambda x: x['validation_recall'])
+best_n = best_result['n_features']
+print(f"Best number of features (by recall): {best_n} (Validation recall: {best_result['validation_recall']:.3f})")
+
+
+# ====================== 5. TEST SET EVALUATION (BEST FEATURES) ======================
+threshold = 0.5
+best_n = 750
+print(f"Number of top features used in final model: {best_n}")
+
+final_pipeline = Pipeline([
+    ("preprocessing", clone(PREPROCESSOR)),
+    ("selector", SelectFromModel(
+        LogisticRegression(penalty="l2", solver="lbfgs", class_weight="balanced", C=0.8, max_iter=1000, random_state=42),
+        max_features=best_n
+    )),
+    ("classifier", LogisticRegression(solver="liblinear", class_weight="balanced", max_iter=1000, random_state=42))
+])
+final_pipeline.fit(X_train, y_train)
+
+y_test_prob = final_pipeline.predict_proba(X_test)[:, 1]
+y_test_pred = np.where(y_test_prob >= threshold, "pos", "neg")
+
+print("\nThreshold used: ", threshold)
+print("\nBest features classification report:\n", classification_report(y_test, y_test_pred))
+
+report_dict_final = classification_report(y_test, y_test_pred, output_dict=True)
+report_df_final = pd.DataFrame(report_dict_final).transpose()
+report_df_final['Model'] = 'Logistic_Regression_liblinear'
+cols = report_df_final.columns.tolist()
+cols = cols[-1:] + cols[:-1]
+report_df_final = report_df_final[cols]
+report_df_final.loc['threshold'] = threshold
+report_df_final.loc['best_n'] = best_n
+report_df_final.to_csv(os.path.join(RES_DIR, f"s5_lr_feature_selection_{best_n}_classification_report_test.csv"), index=True)
+
+cnf_matrix_final = confusion_matrix(y_test, y_test_pred)
+disp = ConfusionMatrixDisplay(confusion_matrix=cnf_matrix_final)
+disp.plot(cmap="Blues")
+plt.title(f"Confusion Matrix ({best_n} features)")
+plt.savefig(os.path.join(RES_DIR, f"s5_lr_feature_selection_{best_n}_confMat_test.png"), dpi=300, bbox_inches="tight")
+plt.show()
+plt.close()
+
+
+# Extract selected features
+selector = final_pipeline.named_steps["selector"]
+selected_mask = selector.get_support()
+selected_features = X_train.columns[selected_mask]
+print(f"Actual number of selected features: {len(selected_features)}")
+
+final_classifier = final_pipeline.named_steps["classifier"]
+coefficients = final_classifier.coef_[0]
+feature_coef_df = pd.DataFrame({
+    "Feature": selected_features,
+    "Coefficient": coefficients
+})
+feature_coef_df["Abs_Coefficient"] = feature_coef_df["Coefficient"].abs()
+feature_coef_df = feature_coef_df.sort_values("Abs_Coefficient", ascending=False)
+feature_coef_df.to_csv(os.path.join(RES_DIR, f"s5_selected_features_coefficients_{best_n}.csv"), index=False)
+
+# Extract predictions
+prediction_results = pd.DataFrame({
+    "sample_ID": X_test.index,
+    "true_label": y_test.values,
+    "probability_pos": y_test_prob,
+    "prediction": y_test_pred
+})
+prediction_results.to_csv(os.path.join(RES_DIR, f"s5_test_sample_predictions_{best_n}.csv"), index=False)
+
+
+# ====================== 6. FEATURE ANALYSIS (HEATMAP) ======================
+# 1. Extract selected features and model coefficients
+selector = final_pipeline.named_steps["selector"]
+final_classifier = final_pipeline.named_steps["classifier"]
+selected_indices = selector.get_support(indices=True)
+selected_features = X_train.columns[selected_indices]
+coefficients = final_classifier.coef_[0]
+
+feature_coef_df = pd.DataFrame({
+    "Feature": selected_features, 
+    "Coefficient": coefficients
+    })
+feature_coef_df = feature_coef_df.sort_values(by="Coefficient", ascending=False)
+
+top_25_positive = feature_coef_df.head(25)
+bottom_25_negative = feature_coef_df.tail(25)
+selected_features_df = pd.concat([top_25_positive, bottom_25_negative])
+selected_feature_names = selected_features_df["Feature"].tolist()
+
+# 2. Prepare scaled test data for visualization
+viz_preprocessor = final_pipeline.named_steps["preprocessing"]
+X_train_viz_scaled = viz_preprocessor.transform(X_train)  # NOT fit_transform, because it's already fitted!
+X_test_viz_scaled = viz_preprocessor.transform(X_test)
+
+# viz_preprocessor = clone(PREPROCESSOR)
+# X_train_viz_scaled = viz_preprocessor.fit_transform(X_train)
+# X_test_viz_scaled = viz_preprocessor.transform(X_test)
+
+X_test_viz_scaled_df = pd.DataFrame(
+    X_test_viz_scaled, 
+    columns=X_test.columns, 
+    index=X_test.index
+    )
+X_test_selected = X_test_viz_scaled_df[selected_feature_names].copy()
+X_test_selected["actual"] = y_test.map({"pos":1, "neg":0}).astype(int)
+X_test_selected["predicted"] = y_test_pred.copy()
+X_test_selected["predicted"] = X_test_selected["predicted"].map({"pos":1, "neg":0})
+X_test_selected = X_test_selected.sort_values(by="predicted", ascending=False)
+
+# 3. Prepare heatmap matrix
+heatmap_data = X_test_selected.transpose()
+rows_order = selected_features_df["Feature"].tolist() + ["actual", "predicted"]
+heatmap_data = heatmap_data.reindex(rows_order)
+
+# 4. Plot heatmap
+plt.figure(figsize=(15,12))
+ax = sns.heatmap(
+    heatmap_data.iloc[:-2],
+    cmap="RdBu_r",
+    xticklabels=False,
+    yticklabels=True,
+    center=0,
+    cbar_kws={"label":"Standardized Feature Value"}
+)
+plt.xlabel("Samples ordered by prediction: positive → negative", fontsize=15)
+plt.ylabel("Features ordered by logistic regression coefficient", fontsize=15)
+plt.title("Heatmap of Top 25 Positive and Bottom 25 Negative Features", fontsize=20)
+
+n_pos = len(top_25_positive)
+ax.axhline(y=n_pos, color="black", linewidth=2)
+pred_pos = sum(y_test_pred == "pos")
+ax.axvline(x=pred_pos, color="black", linewidth=2, linestyle="--")
+ax.plot([], [], color="black", linestyle="--", label="Prediction threshold")
+ax.legend(loc="upper right")
+
+plt.tight_layout()
+plt.savefig(os.path.join(RES_DIR, "s6_lr_feature_heatmap_top25_bottom25.png"), dpi=300, bbox_inches="tight")
+plt.show()
+plt.close()
+
