@@ -32,7 +32,6 @@ Filter _MUC1_ reads            │
       └───────────┬────────────┘
                   ▼
            Processed reads
-
 ```
 
 The processed reads produced at the end of this workflow are used by both downstream analysis approaches:
@@ -81,23 +80,21 @@ The main mutation-generation workflow is implemented using `mutate_muc1.py` and 
 
 ### `read_simulation/`
 
-Contains scripts used to simulate and process sequencing reads.
+Contains scripts used to simulate sequencing reads and to filter/extract _MUC1_-related reads for downstream analysis.
 
 The workflow includes:
 
 - indexing the reference FASTA;
 - sequencing-read simulation using NEAT; and
-- filtering/extracting _MUC1_-related reads for downstream analysis.
+- filtering/extracting _MUC1_-related reads.
 
-The `filter_muc1_reads.sh` workflow can be applied to simulated reads directly
-or to reads generated from the haplotype-mixture (diploid-like) sample
-generation workflow, depending on the downstream analysis.
+The `filter_muc1_reads.sh` workflow can be applied either directly to simulated reads or to reads generated from the haplotype-mixture (diploid-like) sample-generation workflow, depending on the downstream analysis.
 
 The resulting processed reads are used as input to both k-mer feature generation and the VNtyper2 baseline analysis.
 
 ### `sample_generation/`
 
-Contains scripts used to construct the final haplotype-mixture (diploid-like) samples from the simulated sequencing data.
+Contains scripts used to construct the final haplotype-mixture (diploid-like) samples from simulated sequencing reads.
 
 The workflows use SLURM job arrays to process multiple samples in parallel.
 
@@ -126,13 +123,12 @@ Generated sequencing data and intermediate files are not stored in the repositor
 
 The individual scripts contain the commands, parameters, and SLURM configuration required for their respective computational steps.
 
-The workflow should generally be followed in the order:
+The main data-generation workflow proceeds through:
 
 1. `reference_preparation/`
 2. `sample_preparation/`
 3. `read_simulation/`
-4. `sample_generation/`
 
-The exact execution order within each stage depends on the inputs and outputs of the individual scripts.
+Depending on the downstream analysis, simulated reads can either be filtered directly using `filter_muc1_reads.sh`, or first processed through `sample_generation/` to construct haplotype-mixture (diploid-like) samples before _MUC1_ read filtering.
 
 Before running the workflows, ensure that the required software, reference data, and computational environments have been prepared. See [`../environment/README.md`](../environment/README.md).

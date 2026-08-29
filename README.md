@@ -23,7 +23,7 @@ To support these analyses, the repository contains the computational workflows f
 - generating positive and negative simulated samples;
 - simulating sequencing reads;
 - constructing haplotype-mixture (diploid-like) samples;
-- filtering the _MUC1_ reads;
+- processing _MUC1_ reads;
 - generating k-mer feature representations; and
 - performing the downstream machine-learning analyses.
 
@@ -45,29 +45,38 @@ Positive / negative sequence preparation
       ▼
 Read simulation
       │
-      ▼
-Diploid-like sample generation
-      │
-      ▼
-Filter _MUC1_ reads
-      │
-      ├──────────────────────┐
-      │                      │
-      ▼                      ▼
-K-mer feature generation   VNtyper2
-      │                    baseline
-      ▼                      │
-Machine-learning             │
-analyses                     │
-      │                      │
-      └──────────┬───────────┘
-                 ▼
-             Comparison
+      ├───────────────────────┐
+      │                       │
+      ▼                       ▼
+Diploid-like            Filter _MUC1_ reads
+sample generation              │
+      │                        │
+      ▼                        │
+Filter _MUC1_ reads            │
+      │                        │
+      └───────────┬────────────┘
+                  ▼
+           Processed reads
+                  │
+        ┌─────────┴─────────┐
+        │                   │
+        ▼                   ▼
+K-mer feature generation  VNtyper2
+        │                 baseline
+        ▼
+Machine-learning
+analyses
+        │
+        └─────────┬─────────┘
+                  ▼
+              Comparison
 ```
 
-The processed sequencing reads generated during the data-generation workflow provide the input for both downstream approaches.
+The processed _MUC1_ reads generated during the data-generation workflow provide the input for both downstream approaches.
 
 The k-mer representation is generated from these processed reads and used by the machine-learning analyses. VNtyper2 is applied independently to the generated samples as a conventional baseline.
+
+For details of the data-generation workflow, including the alternative routes for processing simulated reads, see [`data_generation/README.md`](data_generation/README.md).
 
 ## Repository structure
 
@@ -96,13 +105,13 @@ The k-mer representation is generated from these processed reads and used by the
 
 ### `data_generation/`
 
-Contains the workflow used to prepare the reference, generate positive and negative samples, simulate sequencing reads, construct haplotype-mixture (diploid-like) samples, and produce the filtered reads for _MUC1_ used by the downstream analyses.
+Contains the workflow used to prepare the reference, generate positive and negative samples, simulate sequencing reads, construct haplotype-mixture (diploid-like) samples, and produce processed _MUC1_ reads for the downstream analyses.
 
 See [`data_generation/README.md`](data_generation/README.md) for details of the data-generation workflow.
 
 ### `feature_generation/`
 
-Contains the scripts used to convert the filtered sequencing reads into **k-mer feature tables** used by the machine-learning analyses.
+Contains the scripts used to convert the processed sequencing reads into **k-mer feature tables** used by the machine-learning analyses.
 
 ### `analysis/`
 
@@ -146,16 +155,19 @@ The general workflow for reproducing the computational analysis is:
 3. **Prepare positive and negative sequence material.**  
    See `data_generation/sample_preparation/`.
 
-4. **Simulate sequencing reads and generate diploid-like samples.**  
-   See `data_generation/read_simulation/` and `data_generation/sample_generation/`.
+4. **Simulate sequencing reads.**  
+   See `data_generation/read_simulation/`.
 
-5. **Filter the simulated reads.**  
-   The resulting filtered reads for _MUC1_ provide the input to the downstream analyses.
+5. **Generate haplotype-mixture (diploid-like) samples where required.**  
+   See `data_generation/sample_generation/`.
 
-6. **Generate k-mer feature tables.**  
+6. **Filter _MUC1_ reads.**  
+   The `filter_muc1_reads.sh` workflow can be applied either directly to the simulated reads or to reads generated from the haplotype-mixture (diploid-like) samples. The resulting processed reads provide the input to the downstream analyses.
+
+7. **Generate k-mer feature tables.**  
    See `feature_generation/`.
 
-7. **Run the machine-learning analyses and VNtyper2 baseline.**  
+8. **Run the machine-learning analyses and VNtyper2 baseline.**  
    See [`analysis/README.md`](analysis/README.md).
 
 The individual workflow scripts contain the commands and SLURM configuration required for their respective computational steps.
