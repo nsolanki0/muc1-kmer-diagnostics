@@ -74,19 +74,21 @@ The computational workflows use a combination of environment-managed software an
 
 The principal tools and versions used in the project are:
 
-Tool	Version	Purpose
-NEAT	3.4	Sequencing-read simulation
-DWGSIM	0.1.17-dev	Sequencing-read simulation
-seqtk	1.5	Sequence processing
-Shark	1.2.0	MUC1 read extraction
-KMC	3.2.4	k-mer counting
-BWA	0.7.18	Sequence alignment
-SAMtools	1.23.1	BAM/SAM processing
-MUMmer	4.0.0beta2	Genome alignment
-minimap2	2.28	Sequence alignment
-Sourmash	4.9.4	Sequence similarity and sketching
-VNtyper	2.0 (Kestrel)	MUC1 baseline analysis
-
+```markdown
+| Tool | Version | Purpose |
+|---|---|---|
+| NEAT | 3.4 | Sequencing-read simulation |
+| DWGSIM | 0.1.17-dev | Sequencing-read simulation |
+| seqtk | 1.5 | Sequence processing |
+| Shark | 1.2.0 | MUC1 read extraction |
+| KMC | 3.2.4 | k-mer counting |
+| BWA | 0.7.18 | Sequence alignment |
+| SAMtools | 1.23.1 | BAM/SAM processing |
+| MUMmer | 4.0.0beta2 | Genome alignment |
+| minimap2 | 2.28 | Sequence alignment |
+| Sourmash | 4.9.4 | Sequence similarity and sketching |
+| VNtyper | 2.0 (Kestrel) | MUC1 baseline analysis |
+```
 Some tools are managed through dedicated Conda or mamba environments, while others are installed separately and invoked directly by the workflow scripts.
 
 ### External Software and Licensing
@@ -109,12 +111,15 @@ Before running the workflows, ensure that the required software versions, refere
 
 The general setup process is:
 
-Install or load Conda/mamba.
-Create the required environments using the environment specification files provided in this directory.
-Install or configure standalone external tools that are not included in the Conda environments.
-Verify the relevant software versions before running the corresponding workflows.
-Prepare the required reference data and input files according to the relevant workflow documentation.
-Run the computational workflows using the Bash, Python, and SLURM scripts provided in the repository.
+The general setup process is:
+
+1. Install or load Conda/mamba.
+2. Create the required environments using the environment specification files provided in this directory.
+3. Install or configure standalone external tools that are not included in the Conda environments.
+4. Verify the relevant software versions before running the corresponding workflows.
+5. Prepare the required reference data and input files according to the relevant workflow documentation.
+6. Run the computational workflows using the Bash, Python, and SLURM scripts provided in the repository.
+
 
 The exact commands, parameters, and software usage are documented in the relevant workflow scripts and directory-level README files.
 
