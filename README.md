@@ -1,56 +1,75 @@
 # k-mer Based Genetic Diagnostics of MUC1: A Privacy-First Approach
 
-This repository contains the computational code and workflows developed
-for the MSc thesis:
+This repository contains the computational code and workflows developed for the MSc thesis:
 
-**k-mer Based Genetic Diagnostics of MUC1: A Privacy-First Approach**
+> **k-mer Based Genetic Diagnostics of MUC1: A Privacy-First Approach**
 
-The project investigates k-mer-based approaches for genetic diagnostics
-of MUC1, with a particular focus on model generalisation across domains,
-including within-domain evaluation, domain transfer, domain adaptation,
-and domain-adversarial approaches.
+## Project overview
 
-The repository also contains the workflows developed for generating
-simulated datasets, preparing reference genomic data, and automating
-the computational analyses using Bash and SLURM.
+This project investigates **k-mer-based approaches for genetic diagnostics of MUC1**, with a particular focus on the generalisation of machine-learning models across different data domains.
 
-The thesis also investigates the potential of privacy-preserving representations 
-within this framework, including the use of hashed representations. The repository 
-contains the corresponding implementation and analysis.
+The project evaluates several settings:
 
+- **Within-domain evaluation**
+- **Domain transfer**
+- **Domain adaptation**
+- **Domain-adversarial learning**
 
-MUC1 k-mer-based analysis
-This repository contains the computational workflow for generating simulated MUC1 sequencing data and evaluating k-mer-based machine-learning approaches for analysis of the resulting samples.
-The workflow consists of two main stages:
+The project also investigates the use of **privacy-preserving representations**, including hashed k-mer representations, and evaluates their potential within the proposed diagnostic framework.
 
-Data generation — preparation of reference sequences, generation of positive and negative samples, read simulation, and processing of simulated reads.
-Analysis — generation of k-mer features, application of machine-learning approaches, and comparison against VNtyper2 as a conventional analysis baseline.
+To support these analyses, the repository contains the computational workflows for:
 
-Workflow
-The overall workflow is:
+- preparing genomic reference data;
+- generating positive and negative simulated samples;
+- simulating sequencing reads;
+- constructing haplotype-mixture (diploid-like) samples;
+- processing the simulated reads;
+- generating k-mer feature representations; and
+- performing the downstream machine-learning analyses.
+
+A conventional **VNtyper2** analysis is also included as a baseline for comparison with the k-mer-based machine-learning approach.
+
+## Computational workflow
+
+The overall computational workflow is:
+
+```text
 Reference genome
-      ↓
+      │
+      ▼
 Reference preparation
-      ↓
+      │
+      ▼
 Positive / negative sequence preparation
-      ↓
+      │
+      ▼
 Read simulation
-      ↓
-Diploid sample generation
-      ↓
-Filter MUC1 reads
-      ↓
-   ┌──┴──────────────┐
-   ↓                 ↓
-k-mer generation    VNtyper2
-   ↓                 ↓
-ML analyses       baseline
-   └───────┬─────────┘
-           ↓
-       Comparison
+      │
+      ▼
+Diploid-like sample generation
+      │
+      ▼
+SHARK / MUC1 read processing
+      │
+      ├──────────────────────┐
+      │                      │
+      ▼                      ▼
+K-mer feature generation   VNtyper2
+      │                    baseline
+      ▼                      │
+Machine-learning             │
+analyses                     │
+      │                      │
+      └──────────┬───────────┘
+                 ▼
+             Comparison
 
-The processed reads produced during data generation provide the input for both downstream approaches. The k-mer representation is generated from these processed reads for use by the machine-learning analyses, while VNtyper2 is applied independently as a conventional baseline.
+The processed sequencing reads generated during the data-generation workflow provide the input for both downstream approaches.
+
+The k-mer representation is generated from these processed reads and used by the machine-learning analyses. VNtyper2 is applied independently to the generated samples as a conventional baseline.
+
 Repository structure
+
 .
 ├── analysis/
 │   ├── baseline/
@@ -65,40 +84,64 @@ Repository structure
 │   └── sample_generation/
 │
 ├── feature_generation/
+│
 ├── environment/
+│
 ├── CITATION.cff
-└── LICENSE
+├── LICENSE
+└── README.md
 
 data_generation/
-Contains the workflow used to prepare the reference, generate positive and negative samples, simulate sequencing reads, construct haplotype mixtures (diploid like) samples, and produce the processed reads used by the downstream analyses.
-See data_generation/README.md for details.
+Contains the workflow used to prepare the reference, generate positive and negative samples, simulate sequencing reads, construct haplotype-mixture (diploid-like) samples, and produce the processed reads used by the downstream analyses.
+See data_generation/README.md for details of the data-generation workflow.
 
 feature_generation/
-Contains the scripts used to convert the processed sequencing data into k-mer feature tables for the machine-learning analyses.
+Contains the scripts used to convert the processed sequencing reads into k-mer feature tables used by the machine-learning analyses.
 analysis/
-Contains the downstream analyses, including the main machine-learning pipelines, targeted and methodological analyses, and the VNtyper2 baseline.
-See analysis/README.md for details.
-
+Contains the downstream analyses, including:
+main machine-learning pipelines;
+targeted analyses;
+methodological analyses; and
+the VNtyper2 baseline.
+See analysis/README.md for details of the individual analyses.
 environment/
-Contains the environment specifications required by the different computational tools and analyses. The environments are documented separately to keep software and dependency information independent from the workflow descriptions.
+Contains Conda environment specifications and documentation of the software and computational requirements used by the project.
+Not all software used in the workflow is contained within the Conda environment files. Some external tools are installed separately and invoked directly by the workflow scripts.
+
+See environment/README.md for environment setup, external software requirements, and computational dependencies.
 
 Reproducibility
-The workflow is designed to run on a SLURM-based computing environment. Several Bash scripts act as execution wrappers around Python programs or external tools and use SLURM arrays to process multiple samples.
-The SLURM implementation is part of the individual computational workflows rather than being treated as a separate automation layer.
+The computational workflows were developed and executed in a Linux-based, SLURM-managed computing environment.
+Bash scripts are used to execute computational steps and, where appropriate, SLURM job arrays are used to process multiple samples in parallel. Some scripts act as wrappers around Python programs or external tools, while others implement computational workflows directly.
 
-Software environments used by the workflow are specified in environment/.
+The repository contains the workflow scripts, environment specifications, and documentation supporting reproduction of the computational analyses. Some external software and reference datasets are not distributed with the repository; their requirements and versions are documented in environment/README.md.
 
-## Getting started
+Generated sequencing data, intermediate files, and analysis outputs are not stored in the repository.
 
-1. Clone the repository.
-2. Set up the required computational environments using the instructions in `environment/`.
-3. Prepare the reference data using `data_generation/reference_preparation/`.
-4. Generate the simulated samples using `data_generation/`.
-5. Generate k-mer features using `feature_generation/`.
-6. Run the analyses in `analysis/`.
+Getting started
+The general workflow for reproducing the computational analysis is:
+Set up the required software and computational environments.
+See environment/README.md.
+Prepare the reference data.
+See data_generation/reference_preparation/.
+Prepare positive and negative sequence material.
+See data_generation/sample_preparation/.
+Simulate sequencing reads and generate diploid-like samples.
+See data_generation/read_simulation/ and data_generation/sample_generation/.
+Process the simulated reads.
+The resulting processed reads provide the input to the downstream analyses.
+Generate k-mer feature tables.
+See feature_generation/.
+Run the machine-learning analyses and VNtyper2 baseline.
+See analysis/README.md.
+The individual workflow scripts contain the commands and SLURM configuration required for their respective computational steps.
+Project context
+This repository provides the computational implementation supporting the MSc thesis.
+The dissertation provides the detailed methodological rationale, experimental design, parameter choices, results, and interpretation. This repository is intended to provide the corresponding computational workflows and reproducibility information.
 
 Data
-The repository contains the code required to generate and analyse the simulated data. Generated sequencing data, intermediate files, and analysis outputs are not included in the repository unless explicitly stated.
+The repository contains the code required to generate and analyse the simulated data.
+Generated sequencing data, intermediate files, and analysis outputs are not included in the repository. Reference data and other external inputs that are required for particular workflows are documented separately where applicable.
 
 Citation
-If using this repository or the associated methods, please refer to CITATION.cff.
+If using the code or workflows from this repository, please refer to CITATION.cff.
