@@ -1,70 +1,129 @@
-Data generation
-This directory contains the workflow used to generate the simulated MUC1 sequencing dataset used in the downstream analyses.
-The data-generation workflow proceeds from preparation of the reference sequence through generation of positive and negative samples, read simulation, diploid sample construction, and final processing of the simulated reads.
+# Data Generation
 
-Workflow
+This directory contains the computational workflows used to generate the simulated MUC1 sequencing data used in the downstream analyses.
+
+The data-generation workflow prepares the genomic reference, generates positive and negative sequence material, simulates sequencing reads, constructs haplotype-mixture (diploid-like) samples, and processes the resulting reads for downstream analysis.
+
+## Workflow
+
+The data-generation workflow consists of four main stages:
+
+```text
 Reference genome
-      ↓
+      │
+      ▼
 Reference preparation
-      ↓
+      │
+      ▼
 Positive / negative sequence preparation
-      ↓
+      │
+      ▼
 Read simulation
-      ↓
-Diploid sample generation
-      ↓
-SHARK / read processing
-      ↓
+      │
+      ▼
+Diploid-like sample generation
+      │
+      ▼
+Filter MUC1 reads
+      │
+      ▼
 Processed reads
-      ↓
-k-mer feature generation / VNtyper2 analysis
+```
 
-The final processed reads are shared by both downstream analysis approaches. They are used as input to k-mer feature generation and are also analysed independently using VNtyper2.
-Directory structure
-reference_preparation/
-Contains scripts used to identify and extract the relevant MUC1 reference sequence and associated annotation information from the reference genome.
-The main steps include:
+The processed reads produced at the end of this workflow are used by both downstream analysis approaches:
 
-identifying the chromosome/contig containing MUC1;
-extracting the relevant reference sequence;
-extracting the corresponding GFF annotation;
-converting annotation information into BED format where required.
-sample_preparation/
-Contains scripts used to prepare the positive and negative sequence material from which simulated samples are generated.
-This includes mutation of the MUC1 sequence and conversion of annotation information required by downstream simulation steps.
+```text
+                    Processed reads
+                          │
+              ┌───────────┴───────────┐
+              │                       │
+              ▼                       ▼
+     K-mer feature generation      VNtyper2
+              │                    baseline
+              ▼
+       Machine-learning
+           analyses
+```
 
-The Bash wrappers use SLURM to run the underlying operations across multiple samples where appropriate.
+## Directory structure
 
-read_simulation/
-Contains the tools and scripts used to simulate and process sequencing reads.
+```text
+data_generation/
+├── reference_preparation/
+├── sample_preparation/
+├── read_simulation/
+├── sample_generation/
+└── README.md
+```
+
+### `reference_preparation/`
+
+Contains scripts used to prepare the genomic reference data required for the simulation workflow.
+
+The scripts include extraction and processing of the relevant chromosome 1 / MUC1 reference sequence and associated genomic annotation information.
+
+### `sample_preparation/`
+
+Contains scripts used to prepare the positive and negative sequence material used to generate the simulated samples.
+
+This includes:
+
+- generation of MUC1 sequence variants;
+- conversion of genomic annotation information to BED format; and
+- preparation of sequences required by the downstream simulation workflow.
+
+The main mutation-generation workflow is implemented using `mutate_muc1.py` and its corresponding Bash/SLURM wrapper.
+
+### `read_simulation/`
+
+Contains scripts used to simulate and process sequencing reads.
+
 The workflow includes:
 
-preparation/indexing of reference FASTA files;
-sequencing-read simulation;
-filtering or processing of simulated reads;
-generation of the processed reads used by downstream analyses.
-The final read-processing step produces the sequencing data used by both the k-mer-based and VNtyper2 approaches.
-sample_generation/
-Contains the workflow used to construct the final diploid positive and negative samples from the prepared sequence material.
-The positive and negative sample-generation scripts use SLURM arrays to process multiple samples.
+- indexing the reference FASTA;
+- sequencing-read simulation using NEAT; and
+- filtering/extracting MUC1-related reads for downstream analysis.
 
-submit_positive.sh and submit_negative.sh are used for SLURM job submission/management associated with the corresponding sample-generation workflows.
+The resulting processed reads are used as input to both k-mer feature generation and the VNtyper2 baseline analysis.
 
-SLURM and execution
-Many of the Bash scripts in this directory contain SLURM directives because the workflow is designed to process multiple samples on a computing cluster.
-These scripts should be viewed primarily according to the computational step they perform rather than as generic automation scripts. For example, mutate_muc1.sh belongs to sample_preparation/ because it executes the mutation-generation workflow, even though it uses a SLURM array.
+### `sample_generation/`
 
-Output
-The final output of the data-generation workflow is a collection of processed sequencing reads representing the simulated samples.
-These processed reads form the input to the downstream stages:
+Contains scripts used to construct the final haplotype-mixture (diploid-like) samples from the simulated sequencing data.
 
-Processed reads
-      ↓
- ┌────┴───────────┐
- ↓                ↓
-k-mer generation  VNtyper2
- ↓                ↓
-ML analysis       baseline
+The workflows use SLURM job arrays to process multiple samples in parallel.
 
-The scripts for converting these processed reads into k-mer feature tables are located in ../feature_generation/.
-The VNtyper2 analysis is located in ../analysis/baseline/.
+The `submit_positive.sh` and `submit_negative.sh` scripts are used for SLURM job submission and array management, while the corresponding sample-generation scripts perform the computational sample-generation workflow.
+
+## Computational environment
+
+The data-generation workflows were developed and executed in a Linux-based, SLURM-managed computing environment.
+
+Several workflows use SLURM job arrays to process multiple samples in parallel. Bash scripts may act as wrappers around Python programs or external tools and may contain SLURM configuration required for batch execution.
+
+Software environments and external tool requirements are documented in [`../environment/README.md`](../environment/README.md).
+
+## Outputs
+
+The main output of the data-generation workflow is a set of processed simulated sequencing reads representing the generated MUC1 samples.
+
+These processed reads are subsequently used for:
+
+1. **k-mer feature generation**, using the workflow in [`../feature_generation/`](../feature_generation/); and
+2. **VNtyper2 baseline analysis**, using the workflow in [`../analysis/baseline/`](../analysis/baseline/).
+
+Generated sequencing data and intermediate files are not stored in the repository.
+
+## Reproducibility
+
+The individual scripts contain the commands, parameters, and SLURM configuration required for their respective computational steps.
+
+The workflow should generally be followed in the order:
+
+1. `reference_preparation/`
+2. `sample_preparation/`
+3. `read_simulation/`
+4. `sample_generation/`
+
+The exact execution order within each stage depends on the inputs and outputs of the individual scripts.
+
+Before running the workflows, ensure that the required software, reference data, and computational environments have been prepared. See [`../environment/README.md`](../environment/README.md).
