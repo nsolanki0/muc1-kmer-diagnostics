@@ -74,7 +74,6 @@ The computational workflows use a combination of environment-managed software an
 
 The principal tools and versions used in the project are:
 
-```markdown
 | Tool | Version | Purpose |
 |---|---|---|
 | NEAT | 3.4 | Sequencing-read simulation |
@@ -88,7 +87,7 @@ The principal tools and versions used in the project are:
 | minimap2 | 2.28 | Sequence alignment |
 | Sourmash | 4.9.4 | Sequence similarity and sketching |
 | VNtyper | 2.0 (Kestrel) | MUC1 baseline analysis |
-```
+
 Some tools are managed through dedicated Conda or mamba environments, while others are installed separately and invoked directly by the workflow scripts.
 
 ### External Software and Licensing
