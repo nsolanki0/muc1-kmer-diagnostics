@@ -49,7 +49,7 @@ Read simulation
 Diploid-like sample generation
       │
       ▼
-SHARK / MUC1 read processing
+Filter MUC1 reads
       │
       ├──────────────────────┐
       │                      │
@@ -63,13 +63,15 @@ analyses                     │
       └──────────┬───────────┘
                  ▼
              Comparison
+```
 
 The processed sequencing reads generated during the data-generation workflow provide the input for both downstream approaches.
 
 The k-mer representation is generated from these processed reads and used by the machine-learning analyses. VNtyper2 is applied independently to the generated samples as a conventional baseline.
 
-Repository structure
+## Repository structure
 
+```text
 .
 ├── analysis/
 │   ├── baseline/
@@ -90,58 +92,86 @@ Repository structure
 ├── CITATION.cff
 ├── LICENSE
 └── README.md
+```
 
-data_generation/
+### `data_generation/`
+
 Contains the workflow used to prepare the reference, generate positive and negative samples, simulate sequencing reads, construct haplotype-mixture (diploid-like) samples, and produce the processed reads used by the downstream analyses.
-See data_generation/README.md for details of the data-generation workflow.
 
-feature_generation/
-Contains the scripts used to convert the processed sequencing reads into k-mer feature tables used by the machine-learning analyses.
-analysis/
+See [`data_generation/README.md`](data_generation/README.md) for details of the data-generation workflow.
+
+### `feature_generation/`
+
+Contains the scripts used to convert the processed sequencing reads into **k-mer feature tables** used by the machine-learning analyses.
+
+### `analysis/`
+
 Contains the downstream analyses, including:
-main machine-learning pipelines;
-targeted analyses;
-methodological analyses; and
-the VNtyper2 baseline.
-See analysis/README.md for details of the individual analyses.
-environment/
+
+- main machine-learning pipelines;
+- targeted analyses;
+- methodological analyses; and
+- the VNtyper2 baseline.
+
+See [`analysis/README.md`](analysis/README.md) for details of the individual analyses.
+
+### `environment/`
+
 Contains Conda environment specifications and documentation of the software and computational requirements used by the project.
+
 Not all software used in the workflow is contained within the Conda environment files. Some external tools are installed separately and invoked directly by the workflow scripts.
 
-See environment/README.md for environment setup, external software requirements, and computational dependencies.
+See [`environment/README.md`](environment/README.md) for environment setup, external software requirements, and computational dependencies.
 
-Reproducibility
-The computational workflows were developed and executed in a Linux-based, SLURM-managed computing environment.
-Bash scripts are used to execute computational steps and, where appropriate, SLURM job arrays are used to process multiple samples in parallel. Some scripts act as wrappers around Python programs or external tools, while others implement computational workflows directly.
+## Reproducibility
 
-The repository contains the workflow scripts, environment specifications, and documentation supporting reproduction of the computational analyses. Some external software and reference datasets are not distributed with the repository; their requirements and versions are documented in environment/README.md.
+The computational workflows were developed and executed in a **Linux-based, SLURM-managed computing environment**.
+
+Bash scripts are used to execute computational steps and, where appropriate, **SLURM job arrays** are used to process multiple samples in parallel. Some scripts act as wrappers around Python programs or external tools, while others implement computational workflows directly.
+
+The repository contains the workflow scripts, environment specifications, and documentation supporting reproduction of the computational analyses. Some external software and reference datasets are not distributed with the repository; their requirements and versions are documented in [`environment/README.md`](environment/README.md).
 
 Generated sequencing data, intermediate files, and analysis outputs are not stored in the repository.
 
-Getting started
+## Getting started
+
 The general workflow for reproducing the computational analysis is:
-Set up the required software and computational environments.
-See environment/README.md.
-Prepare the reference data.
-See data_generation/reference_preparation/.
-Prepare positive and negative sequence material.
-See data_generation/sample_preparation/.
-Simulate sequencing reads and generate diploid-like samples.
-See data_generation/read_simulation/ and data_generation/sample_generation/.
-Process the simulated reads.
-The resulting processed reads provide the input to the downstream analyses.
-Generate k-mer feature tables.
-See feature_generation/.
-Run the machine-learning analyses and VNtyper2 baseline.
-See analysis/README.md.
+
+1. **Set up the required software and computational environments.**  
+   See [`environment/README.md`](environment/README.md).
+
+2. **Prepare the reference data.**  
+   See `data_generation/reference_preparation/`.
+
+3. **Prepare positive and negative sequence material.**  
+   See `data_generation/sample_preparation/`.
+
+4. **Simulate sequencing reads and generate diploid-like samples.**  
+   See `data_generation/read_simulation/` and `data_generation/sample_generation/`.
+
+5. **Process the simulated reads.**  
+   The resulting processed reads provide the input to the downstream analyses.
+
+6. **Generate k-mer feature tables.**  
+   See `feature_generation/`.
+
+7. **Run the machine-learning analyses and VNtyper2 baseline.**  
+   See [`analysis/README.md`](analysis/README.md).
+
 The individual workflow scripts contain the commands and SLURM configuration required for their respective computational steps.
-Project context
+
+## Project context
+
 This repository provides the computational implementation supporting the MSc thesis.
+
 The dissertation provides the detailed methodological rationale, experimental design, parameter choices, results, and interpretation. This repository is intended to provide the corresponding computational workflows and reproducibility information.
 
-Data
+## Data
+
 The repository contains the code required to generate and analyse the simulated data.
+
 Generated sequencing data, intermediate files, and analysis outputs are not included in the repository. Reference data and other external inputs that are required for particular workflows are documented separately where applicable.
 
-Citation
-If using the code or workflows from this repository, please refer to CITATION.cff.
+## Citation
+
+If using the code or workflows from this repository, please refer to [`CITATION.cff`](CITATION.cff).
