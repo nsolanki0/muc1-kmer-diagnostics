@@ -1,47 +1,77 @@
-Computational Environment
+# Computational Environment
+
 This directory contains the Conda environment specifications and documentation for the software and computational requirements used in the project.
+
 The computational workflows were developed and executed in a Linux-based, SLURM-managed high-performance computing (HPC) environment. Several workflows use dedicated Conda or mamba environments to accommodate different software and version requirements.
 
-Software Environments
+## Software Environments
+
 The project uses the following programming languages and software environments:
-Software	Version	Purpose
-Python	3.8.20	Used for compatibility with NEAT (3.4) and for custom sequence-processing scripts involving FASTQ and GFF/GFF3 files.
-Python	3.11.13	Used for the main machine-learning workflows.
-Python	3.11.15	Used for the domain-adversarial neural network (DANN) implementation.
-Python	3.13.7	Used for the VNtyper2 (2.0, Kestrel) baseline analysis.
-R	4.3.2	Used for statistical analysis and data visualisation.
-mamba	—	Used to manage the Sourmash environment.
+
+| Software | Version | Purpose |
+|---|---|---|
+| Python | 3.8.20 | Used for compatibility with NEAT (3.4) and for custom sequence-processing scripts involving FASTQ and GFF/GFF3 files. |
+| Python | 3.11.13 | Used for the main machine-learning workflows. |
+| Python | 3.11.15 | Used for the domain-adversarial neural network (DANN) implementation. |
+| Python | 3.13.7 | Used for the VNtyper2 (2.0, Kestrel) baseline analysis. |
+| R | 4.3.2 | Used for statistical analysis and data visualisation. |
+| mamba | — | Used to manage the Sourmash environment. |
 
 Dedicated environment specifications are provided in this directory where applicable.
-Environment Setup
+
+## Environment Setup
+
 The environment specification files provided in this directory can be used to recreate the computational environments used for the project.
-Conda
+
+### Conda
+
 If Conda is available, an environment can generally be created from an environment specification using:
+
+```bash
 conda env create -f <environment_file>.yml
+```
 
 The environment can then be activated using:
+
+```bash
 conda activate <environment_name>
+```
 
-Mamba
+### Mamba
+
 For environments managed using mamba, an environment can be created using:
+
+```bash
 mamba env create -f <environment_file>.yml
+```
 
 The environment can then be activated using:
+
+```bash
 mamba activate <environment_name>
+```
 
 Replace <environment_file>.yml and <environment_name> with the corresponding environment file and environment name provided in this directory.
+
 After creating an environment, verify the relevant software versions before running the corresponding workflow.
 
 For example:
 
+```bash
 python --version
+```
 
 or, where applicable:
+
+```bash
 R --version
+```
 
 Some software used in the project is installed separately from the Conda environments. These tools must be installed and configured independently before running workflows that require them.
+
 Bioinformatics Software
 The computational workflows use a combination of environment-managed software and standalone bioinformatics tools.
+
 The principal tools and versions used in the project are:
 
 Tool	Version	Purpose
@@ -58,6 +88,7 @@ Sourmash	4.9.4	Sequence similarity and sketching
 VNtyper	2.0 (Kestrel)	MUC1 baseline analysis
 
 Some tools are managed through dedicated Conda or mamba environments, while others are installed separately and invoked directly by the workflow scripts.
+
 External Software and Licensing
 The MIT License in the root of this repository applies to the original code and workflow scripts distributed in this repository.
 Third-party software used by the workflows is not relicensed under the MIT License. Each external tool remains subject to its own license and associated terms.
