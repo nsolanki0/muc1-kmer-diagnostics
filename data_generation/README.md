@@ -23,11 +23,11 @@ Read simulation
       ├───────────────────────┐
       │                       │
       ▼                       ▼
-Diploid-like            Filter _MUC1_ reads
+Diploid-like            Filter MUC1 reads
 sample generation              │
       │                        │
       ▼                        │
-Filter _MUC1_ reads            │
+Filter MUC1 reads            │
       │                        │
       └───────────┬────────────┘
                   ▼

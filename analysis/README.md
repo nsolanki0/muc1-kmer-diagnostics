@@ -11,7 +11,7 @@ The simulated sequencing data are generated using the [`../data_generation/`](..
 The downstream analysis workflow can be summarised as:
 
 ```text
-                    Processed _MUC1_ reads
+                    Processed MUC1 reads
                               │
                  ┌────────────┴────────────┐
                  │                         │
@@ -124,7 +124,7 @@ For simulated data, the relationship between the workflows is:
 Data generation
       │
       ▼
-Processed _MUC1_ reads
+Processed MUC1 reads
       │
       ▼
 Feature generation
