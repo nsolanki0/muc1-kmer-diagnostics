@@ -1,12 +1,12 @@
 # Data Generation
 
-This directory contains the computational workflows used to generate the simulated MUC1 sequencing data used in the downstream analyses.
+This directory contains the computational workflows used to generate the simulated _MUC1_ sequencing data used in the downstream analyses.
 
 The data-generation workflow prepares the genomic reference, generates positive and negative sequence material, simulates sequencing reads, constructs haplotype-mixture (diploid-like) samples, and processes the resulting reads for downstream analysis.
 
 ## Workflow
 
-The data-generation workflow consists of four main stages:
+The data-generation workflow consists of several stages:
 
 ```text
 Reference genome
@@ -20,14 +20,19 @@ Positive / negative sequence preparation
       ▼
 Read simulation
       │
-      ▼
-Diploid-like sample generation
-      │
-      ▼
-Filter MUC1 reads
-      │
-      ▼
-Processed reads
+      ├───────────────────────┐
+      │                       │
+      ▼                       ▼
+Diploid-like            Filter _MUC1_ reads
+sample generation              │
+      │                        │
+      ▼                        │
+Filter _MUC1_ reads            │
+      │                        │
+      └───────────┬────────────┘
+                  ▼
+           Processed reads
+
 ```
 
 The processed reads produced at the end of this workflow are used by both downstream analysis approaches:
@@ -60,7 +65,7 @@ data_generation/
 
 Contains scripts used to prepare the genomic reference data required for the simulation workflow.
 
-The scripts include extraction and processing of the relevant chromosome 1 / MUC1 reference sequence and associated genomic annotation information.
+The scripts include extraction and processing of the relevant chromosome 1 / _MUC1_ reference sequence and associated genomic annotation information.
 
 ### `sample_preparation/`
 
@@ -68,7 +73,7 @@ Contains scripts used to prepare the positive and negative sequence material use
 
 This includes:
 
-- generation of MUC1 sequence variants;
+- generation of _MUC1_ sequence variants;
 - conversion of genomic annotation information to BED format; and
 - preparation of sequences required by the downstream simulation workflow.
 
@@ -82,7 +87,11 @@ The workflow includes:
 
 - indexing the reference FASTA;
 - sequencing-read simulation using NEAT; and
-- filtering/extracting MUC1-related reads for downstream analysis.
+- filtering/extracting _MUC1_-related reads for downstream analysis.
+
+The `filter_muc1_reads.sh` workflow can be applied to simulated reads directly
+or to reads generated from the haplotype-mixture (diploid-like) sample
+generation workflow, depending on the downstream analysis.
 
 The resulting processed reads are used as input to both k-mer feature generation and the VNtyper2 baseline analysis.
 
@@ -104,7 +113,7 @@ Software environments and external tool requirements are documented in [`../envi
 
 ## Outputs
 
-The main output of the data-generation workflow is a set of processed simulated sequencing reads representing the generated MUC1 samples.
+The main output of the data-generation workflow is a set of processed simulated sequencing reads representing the generated _MUC1_ samples.
 
 These processed reads are subsequently used for:
 
