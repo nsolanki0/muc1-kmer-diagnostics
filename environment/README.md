@@ -69,7 +69,7 @@ R --version
 
 Some software used in the project is installed separately from the Conda environments. These tools must be installed and configured independently before running workflows that require them.
 
-Bioinformatics Software
+### Bioinformatics Software
 The computational workflows use a combination of environment-managed software and standalone bioinformatics tools.
 
 The principal tools and versions used in the project are:
@@ -89,7 +89,7 @@ VNtyper	2.0 (Kestrel)	MUC1 baseline analysis
 
 Some tools are managed through dedicated Conda or mamba environments, while others are installed separately and invoked directly by the workflow scripts.
 
-External Software and Licensing
+### External Software and Licensing
 The MIT License in the root of this repository applies to the original code and workflow scripts distributed in this repository.
 Third-party software used by the workflows is not relicensed under the MIT License. Each external tool remains subject to its own license and associated terms.
 
@@ -97,14 +97,16 @@ Users are responsible for consulting the respective software documentation and l
 
 The software versions used for the analyses are documented above to support reproducibility. External software is not necessarily distributed with this repository.
 
-Workflow Automation and HPC
+### Workflow Automation and HPC
 Bash scripting is used for workflow automation, file management, and SLURM job submission.
+
 Computationally intensive workflows are executed on a SLURM-managed high-performance computing (HPC) system. SLURM job arrays are used where appropriate to process independent samples or computational tasks in parallel.
 
 Some Bash scripts act as wrappers around Python programs or external bioinformatics tools, while others contain the computational workflow and SLURM configuration directly.
 
-Reproducibility
+### Reproducibility
 Before running the workflows, ensure that the required software versions, reference data, and computational resources are available.
+
 The general setup process is:
 
 Install or load Conda/mamba.
@@ -113,7 +115,9 @@ Install or configure standalone external tools that are not included in the Cond
 Verify the relevant software versions before running the corresponding workflows.
 Prepare the required reference data and input files according to the relevant workflow documentation.
 Run the computational workflows using the Bash, Python, and SLURM scripts provided in the repository.
+
 The exact commands, parameters, and software usage are documented in the relevant workflow scripts and directory-level README files.
+
 Generated sequencing data, intermediate files, feature tables, model outputs, and analysis results are not stored in the repository.
 
 The computational environment described here corresponds to the software configuration used for the analyses reported in the accompanying MSc thesis.
