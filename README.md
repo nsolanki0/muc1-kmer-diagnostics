@@ -31,7 +31,7 @@ A conventional **VNtyper2** analysis is also included as a baseline for comparis
 
 ## Computational workflow
 
-The overall computational workflow is:
+The overall computational workflow using the simulated data is:
 
 ```text
 Reference genome
@@ -72,9 +72,11 @@ analyses
               Comparison
 ```
 
-The processed _MUC1_ reads generated during the data-generation workflow provide the input for both downstream approaches.
+For simulated data, the processed _MUC1_ reads generated during the data-generation workflow provide the input for the downstream analyses.
 
-The k-mer representation is generated from these processed reads and used by the machine-learning analyses. VNtyper2 is applied independently to the generated samples as a conventional baseline.
+For machine-learning analyses involving real sequencing data, the same feature-generation workflow can be applied directly to the relevant real sequencing data. Depending on the experimental setting, machine-learning analyses may therefore use simulated data, real data, or combinations of both.
+
+For simulated data, the k-mer representation is generated from the processed reads and used by the machine-learning analyses. VNtyper2 is applied independently as a conventional baseline where required.
 
 For details of the data-generation workflow, including the alternative routes for processing simulated reads, see [`data_generation/README.md`](data_generation/README.md).
 
@@ -180,7 +182,7 @@ The dissertation provides the detailed methodological rationale, experimental de
 
 ## Data
 
-The repository contains the code required to generate and analyse the simulated data.
+The repository contains the code required to generate the simulated data and to perform the downstream analyses using simulated and, where applicable, real sequencing data.
 
 Generated sequencing data, intermediate files, and analysis outputs are not included in the repository. Reference data and other external inputs that are required for particular workflows are documented separately where applicable.
 

@@ -88,7 +88,7 @@ The workflow includes:
 - sequencing-read simulation using NEAT; and
 - filtering/extracting _MUC1_-related reads.
 
-The `filter_muc1_reads.sh` workflow can be applied either directly to simulated reads or to reads generated from the haplotype-mixture (diploid-like) sample-generation workflow, depending on the downstream analysis.
+The `filter_muc1_reads.sh` workflow can be applied directly to real or simulated reads. For simulated data, it can also be applied to reads generated from the haplotype-mixture (diploid-like) sample-generation workflow, depending on the downstream analysis.
 
 The resulting processed reads are used as input to both k-mer feature generation and the VNtyper2 baseline analysis.
 
