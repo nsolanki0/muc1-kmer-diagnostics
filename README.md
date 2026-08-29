@@ -1,12 +1,12 @@
-# k-mer Based Genetic Diagnostics of MUC1: A Privacy-First Approach
+# k-mer Based Genetic Diagnostics of _MUC1_: A Privacy-First Approach
 
 This repository contains the computational code and workflows developed for the MSc thesis:
 
-> **k-mer Based Genetic Diagnostics of MUC1: A Privacy-First Approach**
+> **k-mer Based Genetic Diagnostics of _MUC1_: A Privacy-First Approach**
 
 ## Project overview
 
-This project investigates **k-mer-based approaches for genetic diagnostics of MUC1**, with a particular focus on the generalisation of machine-learning models across different data domains.
+This project investigates **k-mer-based approaches for genetic diagnostics of _MUC1_**, with a particular focus on the generalisation of machine-learning models across different data domains.
 
 The project evaluates several settings:
 
@@ -23,7 +23,7 @@ To support these analyses, the repository contains the computational workflows f
 - generating positive and negative simulated samples;
 - simulating sequencing reads;
 - constructing haplotype-mixture (diploid-like) samples;
-- processing the simulated reads;
+- filtering the _MUC1_ reads;
 - generating k-mer feature representations; and
 - performing the downstream machine-learning analyses.
 
@@ -49,7 +49,7 @@ Read simulation
 Diploid-like sample generation
       │
       ▼
-Filter MUC1 reads
+Filter _MUC1_ reads
       │
       ├──────────────────────┐
       │                      │
@@ -96,13 +96,13 @@ The k-mer representation is generated from these processed reads and used by the
 
 ### `data_generation/`
 
-Contains the workflow used to prepare the reference, generate positive and negative samples, simulate sequencing reads, construct haplotype-mixture (diploid-like) samples, and produce the processed reads used by the downstream analyses.
+Contains the workflow used to prepare the reference, generate positive and negative samples, simulate sequencing reads, construct haplotype-mixture (diploid-like) samples, and produce the filtered reads for _MUC1_ used by the downstream analyses.
 
 See [`data_generation/README.md`](data_generation/README.md) for details of the data-generation workflow.
 
 ### `feature_generation/`
 
-Contains the scripts used to convert the processed sequencing reads into **k-mer feature tables** used by the machine-learning analyses.
+Contains the scripts used to convert the filtered sequencing reads into **k-mer feature tables** used by the machine-learning analyses.
 
 ### `analysis/`
 
@@ -149,8 +149,8 @@ The general workflow for reproducing the computational analysis is:
 4. **Simulate sequencing reads and generate diploid-like samples.**  
    See `data_generation/read_simulation/` and `data_generation/sample_generation/`.
 
-5. **Process the simulated reads.**  
-   The resulting processed reads provide the input to the downstream analyses.
+5. **Filter the simulated reads.**  
+   The resulting filtered reads for _MUC1_ provide the input to the downstream analyses.
 
 6. **Generate k-mer feature tables.**  
    See `feature_generation/`.
@@ -175,3 +175,7 @@ Generated sequencing data, intermediate files, and analysis outputs are not incl
 ## Citation
 
 If using the code or workflows from this repository, please refer to [`CITATION.cff`](CITATION.cff).
+
+## License
+
+The code in this repository is released under the [MIT License](LICENSE).
