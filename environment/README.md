@@ -66,6 +66,8 @@ The requirements for creating a NEAT-3.4 conda environment are:
 * numpy >= 1.22.2
 * pysam >= 0.16.0.1
 
+To setup the environment:
+
 1. Download NEAT-3.4 from:
    https://github.com/ncsa/NEAT/releases
 
@@ -126,7 +128,7 @@ module load python/3.13.7
 source $HOME/vntyper/bin/activate
 ```
 
-Alternative installation instructions for VNtyper 2.0 can be found at (https://github.com/maxkrou/VNtyper#installation)
+Alternative installation instructions for VNtyper 2.0 can be found at: https://github.com/maxkrou/VNtyper#installation
 
 After creating an environment, verify the relevant software versions before running the corresponding workflow.
 
