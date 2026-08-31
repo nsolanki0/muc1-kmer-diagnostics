@@ -20,14 +20,14 @@ Positive / negative sequence preparation
       ▼
 Read simulation
       │
-      ├───────────────────────┐
-      │                       │
-      ▼                       ▼
+      ├────────────────────────┐
+      │                        │
+      ▼                        ▼
 Diploid-like            Filter MUC1 reads
 sample generation              │
       │                        │
       ▼                        │
-Filter MUC1 reads            │
+Filter MUC1 reads              │
       │                        │
       └───────────┬────────────┘
                   ▼

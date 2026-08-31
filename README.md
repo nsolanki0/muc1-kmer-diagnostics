@@ -52,7 +52,7 @@ Diploid-like            Filter MUC1 reads
 sample generation              │
       │                        │
       ▼                        │
-Filter MUC1 reads            │
+Filter MUC1 reads              │
       │                        │
       └───────────┬────────────┘
                   ▼
@@ -63,10 +63,10 @@ Filter MUC1 reads            │
         ▼                   ▼
 K-mer feature generation  VNtyper2
         │                 baseline
-        ▼
-Machine-learning
-analyses
-        │
+        ▼                   │             
+Machine-learning            │
+analyses                    │
+        │                   │
         └─────────┬─────────┘
                   ▼
               Comparison

@@ -23,11 +23,11 @@ The downstream analysis workflow can be summarised as:
         │                 │                │
         ▼                 ▼                │
  Main ML pipelines   Targeted /            │
-                     methodological        │
-                     analyses              │
+        │            methodological        │
+        │            analyses              │
         │                 │                │
         └────────┬────────┘                │
-                 └────────────┬───────────┘
+                 └────────────┬────────────┘
                               ▼
                          Comparison
 ```
