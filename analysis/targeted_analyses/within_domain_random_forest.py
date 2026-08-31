@@ -1,12 +1,3 @@
-
-"""
-
----
-**Note:**
-- Data paths and sensitive details are removed for sharing.
-
-"""
-
 #!/usr/bin/env python3
 
 # ====================== IMPORTS ======================
@@ -102,9 +93,9 @@ print(f"Using preprocessing: {STANDARDISATION}")
 
 # ====================== DIRECTORIES ======================
 
-RES_DIR = "/scratch/solankin/MUC1/results/reRun2/01_4Real_ZScoreC_31_RF"
+RES_DIR = "../results"
 os.makedirs(RES_DIR, exist_ok=True)
-DATA = "/scratch/solankin/MUC1/data/KMC/real_260421/realCombinedUnmerged31.csv.xz"
+DATA = "../data.csv.xz"
 
 print("Dataset: ", DATA)
 print("Result directory: ", RES_DIR)
@@ -314,7 +305,6 @@ plt.close()
 
 # ====================== 4. FEATURE SELECTION (IF BASELINE IS GOOD) ======================
 feature_counts = sorted(list(set([50, 100, 200, 500, 750, 1000, 2000, 4000, 5000])))
-#feature_counts = sorted(list(set([50, 100, 200, 500, 750, 1000, 2000, 4000, 6000, 7000])))
 
 scoring = {
     'accuracy': make_scorer(accuracy_score),

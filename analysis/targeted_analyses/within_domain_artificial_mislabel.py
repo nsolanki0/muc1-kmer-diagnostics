@@ -1,12 +1,3 @@
-
-"""
-
----
-**Note:**
-- Data paths and sensitive details are removed for sharing.
-
-"""
-
 #!/usr/bin/env python3
 
 # ====================== IMPORTS ======================
@@ -101,13 +92,9 @@ print(f"Using preprocessing: {STANDARDISATION}")
 
 # ====================== DIRECTORIES ======================
 
-RES_DIR = "/scratch/solankin/MUC1/results/reRun2/11_2sim2Dipc100Hapc200Unmerged_FullBin_Mislabel_ZScoreC_31"
+RES_DIR = "../results"
 os.makedirs(RES_DIR, exist_ok=True)
-DATA = "/scratch/solankin/MUC1/data/KMC/sim2/sim2c200UnmergedDip/sim2c100Hapc200UnmergedDip31.csv.xz"
-
-# RES_DIR = "/scratch/solankin/MUC1/results/reRun2/11_3RealKMC_Mislabel_ZScoreC_31" 
-# os.makedirs(RES_DIR, exist_ok=True)
-# DATA = "/scratch/solankin/MUC1/data/KMC/real_260421/realCombinedUnmerged31.csv.xz"
+DATA = "../data.csv.xz"
 
 print("Dataset: ", DATA)
 print("Result directory: ", RES_DIR)
@@ -281,11 +268,6 @@ print(f"Results saved to: {output_path}")
 models_path = os.path.join(RES_DIR, "s2_fitted_models.joblib")
 joblib.dump(fitted_models, models_path)
 print(f"Fitted models saved to: {models_path}")
-
-# # Load saved models
-# models_path = os.path.join(RES_DIR, "s2_fitted_models.joblib")
-# fitted_models = joblib.load(models_path)
-
 
 # --- PLOTS ---
 

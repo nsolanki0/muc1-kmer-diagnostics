@@ -1,12 +1,3 @@
-
-"""
-
----
-**Note:**
-- Data paths and sensitive details are removed for sharing.
-
-"""
-
 #!/usr/bin/env python3
 
 # ====================== IMPORTS ======================
@@ -31,20 +22,12 @@ import gzip
 
 # ====================== DIRECTORIES ======================
 
-RES_DIR = "/Users/sol/_courses/project_work/thesis/results/reRun2/4figures/15_5sim2Dipc100Hapc200Unmerged_27dupCBin_RLKMC_PCA_ZScoreC_31" 
+RES_DIR = "../results"
 os.makedirs(RES_DIR, exist_ok=True)
-DATA_REAL = "/Users/sol/_courses/project_work/thesis/data/KMC/real_260421/realCombinedUnmerged31.csv.xz"
-DATA_SIM = "/Users/sol/_courses/project_work/thesis/data/KMC/sim2/sim2c200UnmergedDip/sim2c100Hapc200UnmergedDip_27dupCBin_31.csv.xz"
-fasta_file = "/Users/sol/Desktop/MUC1_variants/GCA_018469705.1_chr1_muc1_gene_region_27pos_27dupC_gene_region_101534451-101534482.fa.gz"
 
-# RES_DIR = "/scratch/solankin/MUC1/results/reRun2/15_5sim2Dipc100Hapc200Unmerged_27dupCBin_RLKMC_PCA_ZScoreC_31" 
-# os.makedirs(RES_DIR, exist_ok=True)
-# DATA_REAL = "/scratch/solankin/MUC1/data/KMC/real_260421/realCombinedUnmerged31.csv.xz"
-# DATA_SIM = "/scratch/solankin/MUC1/data/KMC/sim2/sim2c200UnmergedDip/sim2c100Hapc200UnmergedDip_27dupCBin_31.csv.xz"
-# fasta_file = "/scratch/solankin/MUC1/data/MUC1_variant/GCA_018469705.1_chr1_muc1_gene_region_27pos_27dupC_gene_region_101534451-101534482.fa.gz"
-
-#fasta_file = "/scratch/solankin/data/muc1_sim2/MUC1_pos/MUC1_variants2/GCA_018469705.1_chr1_muc1_gene_region_27pos_27dupC_gene_region_101534451-101534482.fa.gz"
-#("/scratch/data/GCA_018469705.1_chr1_muc1_gene_region_27pos_27dupC_gene_region_101534451-101534482.fa.gz")
+DATA_REAL = "../data_real.csv.xz"
+DATA_SIM = "../data_sim.csv.xz"
+fasta_file = "../GCA_018469705.1_chr1_muc1_gene_region_27pos_27dupC_gene_region_101534451-101534482.fa.gz"
 
 print("Real dataset: ", DATA_REAL)
 print("Simulatated dataset: ", DATA_SIM)

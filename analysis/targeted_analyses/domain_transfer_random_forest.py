@@ -1,12 +1,3 @@
-
-"""
-
----
-**Note:**
-- Data paths and sensitive details are removed for sharing.
-
-"""
-
 #!/usr/bin/env python3
 
 # ====================== IMPORTS ======================
@@ -101,10 +92,11 @@ print(f"Using preprocessing: {STANDARDISATION}")
 
 # ====================== DIRECTORIES ======================
 
-RES_DIR = "/scratch/solankin/MUC1/results/reRun2/14_3sim2Dipc100Hapc200Unmerged_27posBin_RLKMC_RF_ZScoreC_31"
+RES_DIR = "../results"
 os.makedirs(RES_DIR, exist_ok=True)
-DATA_REAL = "/scratch/solankin/MUC1/data/KMC/real_260421/realCombinedUnmerged31.csv.xz"
-DATA_SIM = "/scratch/solankin/MUC1/data/KMC/sim2/sim2c200UnmergedDip/sim2c100Hapc200UnmergedDip_27PosBin_31.csv.xz"
+
+DATA_REAL = "../data_real.csv.xz"
+DATA_SIM = "../data_sim.csv.xz"
 
 print("Real dataset: ", DATA_REAL)
 print("Simulatated dataset: ", DATA_SIM)

@@ -169,7 +169,6 @@ def gff3_exons_to_bed_dicts(gff3_path: str) -> List[Dict]:
                 })
     return bed_entries
 
-#def write_full_bed(bed_dicts: list[dict], bed_path: str) -> None:
 def write_full_bed(bed_dicts: List[Dict], bed_path: str) -> None:
     """Write all exons to a BED file."""
     with open(bed_path, "w") as f:
@@ -225,25 +224,6 @@ def save_mutated_gene_region(
 def main(args):
     try:
         # Define dictionaries for mutations and motifs
-#        d_mutations = {
-#            "X": {"Xatt": "GCCCACGGTGTCACCTCGGCCCCGGACACCAGGCCGGCCCCGGGCTCCACCGCCCCCCCA"},
-#            "5": {"5att": "GCCCACGATGTCACCTCAGCCCCGGACAACAAGCCAGCCCCGGGCTCCACCGCCCCCCCA"},
-#            "B": {"Batt": "GCCCACGGTGTCACCTCGGCCCCGGAGAGCAGGCCGGCCCCGGGCTCCACCGCCCCCCCCA"}
-#        }
-#        d_mutations = {
-#            "27pos": {
-#                "27dupC": "GGGCTCCACCGCCCCCCCCAGCCCACGGTGTC",
-#                "27insCCCC": "GGGCTCCACCGCCCCCCCCCCCAGCCCACGGTGTC",
-#                "26_27insG": "GGGCTCCACCGCCCCCCGCAGCCCACGGTGTC",
-#                "28dupA": "GGGCTCCACCGCCCCCCCAAGCCCACGGTGT",
-#                "23delinsAT": "GGCTCCACCGCCATCCCCAGCCCACGGTGTC"
-#            }
-#        }
-#        d_mutations = {
-#            "27pos": {
-#                "27dupC": "GGGCTCCACCGCCCCCCCCAGCCCACGGTGTC"
-#            }
-#        }
         d_mutations = {
             "X": {"Xatt": "GCCCACGGTGTCACCTCGGCCCCGGACACCAGGCCGGCCCCGGGCTCCACCGCCCCCCCA"},
             "5": {"5att": "GCCCACGATGTCACCTCAGCCCCGGACAACAAGCCAGCCCCGGGCTCCACCGCCCCCCCA"},

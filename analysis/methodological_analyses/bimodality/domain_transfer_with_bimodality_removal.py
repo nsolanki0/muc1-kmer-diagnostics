@@ -1,12 +1,3 @@
-
-"""
-
----
-**Note:**
-- Data paths and sensitive details are removed for sharing.
-
-"""
-
 #!/usr/bin/env python3
 
 # ====================== IMPORTS ======================
@@ -101,24 +92,14 @@ PREPROCESSOR = get_preprocessing_pipeline(STANDARDISATION)
 print(f"Using preprocessing: {STANDARDISATION}")
 
 
-
-RES_DIR = "/Users/sol/_courses/project_work/thesis/results/reRun2/4figures/13_3sim2Dipc100Hapc200Unmerged_FullBin_RLKMC_Bimod_31"
-os.makedirs(RES_DIR, exist_ok=True)
-
-DATA_REAL = "/Users/sol/_courses/project_work/thesis/data/KMC/real_260421/realCombinedUnmerged31.csv.xz"
-DATA_SIM = "/Users/sol/_courses/project_work/thesis/data/KMC/sim2/sim2c200UnmergedDip/sim2c100Hapc200UnmergedDip31.csv.xz"
-#DATA_SIM = "/data/KMC/sim2/sim2Hapc200Unmerged/sim2Hapc200Unmerged31.csv.xz"
-DATA_SEL = "/Users/sol/_courses/project_work/thesis/data/KMC/sim2/TopFeat/top_500_features0_exp27_31.csv"
-
-
 # ====================== DIRECTORIES ======================
 
-# RES_DIR = "/scratch/solankin/MUC1/results/reRun2/13_4sim2Dipc100Hapc200Unmerged_FullBin_RLKMC_Bimod_YeoJC_31"
-# RES_DIR = "/scratch/solankin/MUC1/results/reRun2/13_2sim2Dipc100Hapc200Unmerged_FullBin_RLKMC_Bimod_ZScoreC_31"
-# os.makedirs(RES_DIR, exist_ok=True)
-# DATA_REAL = "/scratch/solankin/MUC1/data/KMC/real_260421/realCombinedUnmerged31.csv.xz"
-# DATA_SIM = "/scratch/solankin/MUC1/data/KMC/sim2/sim2c200UnmergedDip/sim2c100Hapc200UnmergedDip31.csv.xz"
-# DATA_SEL = "/scratch/solankin/MUC1/data/KMC/sim2/TopFeat/top_500_features0_exp27_31.csv"
+RES_DIR = "../results"
+os.makedirs(RES_DIR, exist_ok=True)
+
+DATA_REAL = "../data_real.csv.xz"
+DATA_SIM = "../data_sim.csv.xz"
+DATA_SEL = "../data_sel.csv.xz"
 
 print("Real dataset: ", DATA_REAL)
 print("Simulatated dataset: ", DATA_SIM)

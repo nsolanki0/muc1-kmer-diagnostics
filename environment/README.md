@@ -1,23 +1,42 @@
 # Computational Environment
 
-This directory contains the Conda environment specifications and documentation for the software and computational requirements used in the project.
+This directory contains environment specifications and documentation describing the software and computational requirements used in the project.
 
-The computational workflows were developed and executed in a Linux-based, SLURM-managed high-performance computing (HPC) environment. Several workflows use dedicated Conda or mamba environments to accommodate different software and version requirements.
+The computational workflows were developed and primarily executed in a Linux-based, SLURM-managed high-performance computing (HPC) environment. The environments and software specifications are provided to support local reproduction where feasible.
 
-## Software Environments
+## Programming Languages and Environment Managers
 
 The project uses the following programming languages and software environments:
 
 | Software | Version | Purpose |
 |---|---|---|
-| Python | 3.8.20 | Used for compatibility with NEAT (3.4) and for custom sequence-processing scripts involving FASTQ and GFF/GFF3 files. |
-| Python | 3.11.13 | Used for the main machine-learning workflows. |
-| Python | 3.11.15 | Used for the domain-adversarial neural network (DANN) implementation. |
-| Python | 3.13.7 | Used for the VNtyper2 (2.0, Kestrel) baseline analysis. |
-| R | 4.3.2 | Used for statistical analysis and data visualisation. |
-| mamba | — | Used to manage the Sourmash environment. |
+| Python | 3.8.20 | NEAT 3.4 compatibility and custom FASTQ/GFF/GFF3 processing scripts |
+| Python | 3.11.13 | Main machine-learning workflows |
+| Python | 3.11.15 | Domain-adversarial neural network (DANN) implementation |
+| Python | 3.13.7 | VNtyper (2.0) baseline analysis |
+| R | 4.3.2 | Statistical analysis and data visualisation |
+| mamba | — | Alternative package manager for creating the Sourmash environment |
+
+## Environment Overview
+
+| Environment | Manager | Python version | Main software |
+|---|---|---|---|
+| neat34_env | Conda | 3.8.20 | NEAT 3.4 |
+| ml_env | Conda | 3.11.13 | Machine-learning workflows |
+| dann_env | Conda | 3.11.15 | DANN implementation |
+| vntyper | Python venv | 3.13.7 | VNtyper 2.0 |
+| smash | mamba | — | Sourmash |
 
 Dedicated environment specifications are provided in this directory where applicable.
+
+Available environment files:
+
+| File | Environment | Purpose |
+|---|---|---|
+| ml_env.yml | ml_env | Main machine-learning workflows |
+| dann_env.yml | dann_env | Domain-adversarial neural network workflow |
+
+NEAT-3.4 is installed from source rather than through a Conda environment file; installation instructions are provided below.
 
 ## Environment Setup
 
@@ -25,7 +44,7 @@ The environment specification files provided in this directory can be used to re
 
 ### Conda
 
-If Conda is available, an environment can generally be created from an environment specification using:
+If Conda is available, an environment can generally be created from an environment specification (ml_env.yml, dann_env.yml) using:
 
 ```bash
 conda env create -f <environment_file>.yml
@@ -37,21 +56,77 @@ The environment can then be activated using:
 conda activate <environment_name>
 ```
 
-### Mamba
+The requirements for creating a NEAT-3.4 conda environment are:
 
-For environments managed using mamba, an environment can be created using:
+* python >= 3.8
+* biopython == 1.79
+* matplotlib >= 3.3.4 (optional, for plotting utilities)
+* matplotlib-venn >= 0.11.6 (optional, for plotting utilities)
+* pandas >= 1.2.1
+* numpy >= 1.22.2
+* pysam >= 0.16.0.1
+
+1. Download NEAT-3.4 from:
+   https://github.com/ncsa/NEAT/releases
+
+2. Create a conda environment
 
 ```bash
-mamba env create -f <environment_file>.yml
+conda create -n neat34_env python=3.8
+```
+3. Activate the environment and install NEAT-3.4 into it 
+
+```bash
+conda activate neat34_env
+python -m pip install -e /path/to/NEAT-3.4
+```
+Replace `/path/to/NEAT-3.4` with the location of the extracted NEAT source directory. Additional packages should only be installed if missing.
+
+### Mamba
+
+The Sourmash environment managed using mamba can be created following the instructions at: https://sourmash.readthedocs.io/en/latest/tutorial-install.html
+
+To install sourmash, create a new environment named smash and install sourmash:
+
+```bash
+mamba create -y -n smash sourmash-minimal
 ```
 
 The environment can then be activated using:
 
 ```bash
-mamba activate <environment_name>
+mamba activate smash
 ```
 
-Replace <environment_file>.yml and <environment_name> with the corresponding environment file and environment name provided in this directory.
+### Python venv environment
+
+VNtyper 2.0 can be installed using Python's built-in `venv` module. The following example shows installation on a SLURM-managed HPC system:
+
+On local systems, omit the `module` commands and ensure that Python 3.13.7 is available before creating the environment.
+
+```bash
+cd $HOME
+module purge
+module load python/3.13.7
+python -m venv vntyper
+
+source vntyper/bin/activate
+
+git clone https://github.com/hassansaei/vntyper.git
+cd vntyper
+pip install .
+pip install matplotlib plotly jinja2 requests
+```
+
+Then, to use the application:
+
+```bash
+module purge
+module load python/3.13.7
+source $HOME/vntyper/bin/activate
+```
+
+Alternative installation instructions for VNtyper 2.0 can be found at (https://github.com/maxkrou/VNtyper#installation)
 
 After creating an environment, verify the relevant software versions before running the corresponding workflow.
 
@@ -59,15 +134,9 @@ For example:
 
 ```bash
 python --version
+
 ```
-
-or, where applicable:
-
-```bash
-R --version
-```
-
-Some software used in the project is installed separately from the Conda environments. These tools must be installed and configured independently before running workflows that require them.
+Some software dependencies are installed separately from the managed environments. These tools must be installed and configured independently before running workflows that require them.
 
 ### Bioinformatics Software
 The computational workflows use a combination of environment-managed software and standalone bioinformatics tools.
@@ -110,8 +179,6 @@ Before running the workflows, ensure that the required software versions, refere
 
 The general setup process is:
 
-The general setup process is:
-
 1. Install or load Conda/mamba.
 2. Create the required environments using the environment specification files provided in this directory.
 3. Install or configure standalone external tools that are not included in the Conda environments.
@@ -124,4 +191,4 @@ The exact commands, parameters, and software usage are documented in the relevan
 
 Generated sequencing data, intermediate files, feature tables, model outputs, and analysis results are not stored in the repository.
 
-The computational environment described here corresponds to the software configuration used for the analyses reported in the accompanying MSc thesis.
+The computational environment described here corresponds to the software configuration used for the analyses reported in the accompanying MSc thesis. Later software versions may require additional testing before being used to reproduce the results.

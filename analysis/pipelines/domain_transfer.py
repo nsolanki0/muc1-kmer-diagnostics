@@ -1,12 +1,3 @@
-
-"""
-
----
-**Note:**
-- Data paths and sensitive details are removed for sharing.
-
-"""
-
 #!/usr/bin/env python3
 
 # ====================== IMPORTS ======================
@@ -116,6 +107,7 @@ def main():
 
     args = parser.parse_args()
 
+    # Data and directories
     DATA_REAL = args.data_real
     DATA_SIM = args.data_sim
     RES_DIR = args.out
@@ -124,26 +116,12 @@ def main():
     print("Simulated dataset: ", DATA_SIM)
     print("Result directory: ", RES_DIR)
 
+    # Chosen preprocessing method 
     STANDARDISATION = args.preprocessing
     PREPROCESSOR = get_preprocessing_pipeline(STANDARDISATION)
     print(f"Using preprocessing: {STANDARDISATION}")
 
     os.makedirs(RES_DIR, exist_ok=True)
-
-
-    # ----------------------------------------------------------
-    # CHOOSE THE PREPROCESSING METHOD HERE
-    # ----------------------------------------------------------
-    #STANDARDISATION = "zscore"  # "zscore", "quantile", "log_robust", "yeojohnson", "clr", "signedlog"
-    #PREPROCESSOR = get_preprocessing_pipeline(STANDARDISATION)
-    #print(f"Using preprocessing: {STANDARDISATION}")
-    
-    
-    # ====================== DIRECTORIES ======================
-    
-    #print("Real dataset: ", DATA_REAL)
-    #print("Simulatated dataset: ", DATA_SIM)
-    #print("Result directory: ", RES_DIR)
     
     
     # ====================== 1. DATA PREP ======================
@@ -620,7 +598,6 @@ def main():
     
     # ====================== 4. FEATURE SELECTION (IF BASELINE IS GOOD) ======================
     feature_counts = sorted(list(set([50, 100, 200, 500, 750, 1000, 2000, 4000, 5000])))
-    #feature_counts = sorted(list(set([50, 100, 200, 500, 750, 1000, 2000, 4000, 6000, 7000])))
     
     scoring = {
         'accuracy': make_scorer(accuracy_score),
@@ -839,13 +816,9 @@ def main():
     
     # 2. Prepare scaled test data for visualization
     viz_preprocessor = final_pipeline.named_steps["preprocessing"]
-    X_train_viz_scaled = viz_preprocessor.transform(X_train)  # NOT fit_transform, because it's already fitted!
+    X_train_viz_scaled = viz_preprocessor.transform(X_train)  
     X_test_viz_scaled = viz_preprocessor.transform(X_test)
-    
-    # viz_preprocessor = clone(PREPROCESSOR)
-    # X_train_viz_scaled = viz_preprocessor.fit_transform(X_train)
-    # X_test_viz_scaled = viz_preprocessor.transform(X_test)
-    
+        
     X_test_viz_scaled_df = pd.DataFrame(
         X_test_viz_scaled, 
         columns=X_test.columns, 
@@ -905,16 +878,7 @@ def main():
     plt.scatter(X_real_test_pca[y_test == "neg", 0], X_real_test_pca[y_test == "neg", 1], c='orange', label='Real Test (Negative)', alpha=0.5)
     
     explained_var = pca_pipeline.named_steps["pca"].explained_variance_ratio_
-    
-    # plt.xlabel(f'Principal Component 1 ({explained_var[0]*100:.1f}%)')
-    # plt.ylabel(f'Principal Component 2 ({explained_var[1]*100:.1f}%)')
-    # plt.title('PCA: Simulated vs Real Data (Aligned Features, Colored by Class)')
-    # plt.legend()
-    # plt.grid()
-    # plt.savefig(os.path.join(RES_DIR, "s7_simReal_projection_colored_var_2.png"), dpi=300)
-    # plt.show()
-    # plt.close()
-    
+        
     plt.xlabel(f'Principal Component 1 ({explained_var[0]*100:.1f}%)')
     plt.ylabel(f'Principal Component 2 ({explained_var[1]*100:.1f}%)')
     plt.title('PCA: Simulated vs Real Data')
@@ -924,8 +888,6 @@ def main():
     plt.savefig(os.path.join(RES_DIR, "s7_simReal_projection_colored_var_2.png"), dpi=300)
     plt.show()
     plt.close()
-
-
 
 if __name__ == "__main__":
     main()

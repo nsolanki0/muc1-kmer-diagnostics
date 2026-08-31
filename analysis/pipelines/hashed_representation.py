@@ -1,11 +1,3 @@
-
-"""
----
-**Note:**
-- Data paths and sensitive details are removed for sharing.
-
-"""
-
 #!/usr/bin/env python3
 
 # ====================== IMPORTS ======================
@@ -34,10 +26,11 @@ TEST_SIZE_VAL_SPLIT = 0.2           # For splitting simulated+real into train/va
 
 # ====================== DIRECTORIES ======================
 
-RES_DIR = os.path.join("/Users", "sol", "_courses", "project_work", "thesis", "results", "reRun2Cl", "22_1Hashing_FullLoc_31")
+RES_DIR = "../results"
 os.makedirs(RES_DIR, exist_ok=True)
-DATA_REAL = os.path.join("/Users", "sol", "_courses", "project_work", "thesis", "data", "KMC", "real_260421", "realCombinedUnmerged31.csv.xz")
-DATA_SIM = os.path.join("/Users", "sol", "_courses", "project_work", "thesis", "data", "KMC", "sim2", "sim2c200UnmergedDip", "sim2c100Hapc200UnmergedDip31.csv.xz")
+
+DATA_REAL = "../data_real.csv.xz"
+DATA_SIM = "../data_sim.csv.xz"
 
 print("Real dataset: ", DATA_REAL)
 print("Simulatated dataset: ", DATA_SIM)
@@ -224,6 +217,3 @@ plt.savefig(os.path.join(RES_DIR, "s12_lr_full_feature_confMat_test.png"), dpi=3
 plt.show()
 plt.close()
 
-
-# len(set(hashed_features)) == len(hashed_features)
-# Out[13]: True

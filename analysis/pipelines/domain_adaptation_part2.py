@@ -1,11 +1,3 @@
-
-"""
----
-**Note:**
-- Data paths and sensitive details are removed for sharing.
-
-"""
-
 #!/usr/bin/env python3
 
 # ====================== IMPORTS ======================
@@ -40,10 +32,11 @@ CANDIDATE_FEATURES = [100, 500, 750, 1000, 2000, 4000]
 
 # ====================== DIRECTORIES ======================
 
-RES_DIR = os.path.join("/Users", "sol", "_courses", "project_work", "thesis", "results", "reRun2", "21_3_DomainAdaptation2_PIP_ZScoreC_31_260801")
+RES_DIR = "../results"
 os.makedirs(RES_DIR, exist_ok=True)
-DATA_REAL = os.path.join("/Users", "sol", "_courses", "project_work", "thesis", "data", "KMC", "real_260421", "realCombinedUnmerged31.csv.xz")
-DATA_SIM = os.path.join("/Users", "sol", "_courses", "project_work", "thesis", "data", "KMC", "sim2", "sim2c200UnmergedDip", "sim2c100Hapc200UnmergedDip31.csv.xz")
+
+DATA_REAL = "../data_real.csv.xz"
+DATA_SIM = "../data_sim.csv.xz"
 
 print("Real dataset: ", DATA_REAL)
 print("Simulatated dataset: ", DATA_SIM)
@@ -219,28 +212,6 @@ X_train_tun_scaled = tun_pipeline.fit_transform(X_train_tun)
 X_val_tun_scaled = tun_pipeline.transform(X_val_tun)
 X_test_tun_scaled = tun_pipeline.transform(X_test_tun)
 
-# X_train_orig.shape
-# Out[11]: (5284, 14368)
-
-# X_sim_train.shape
-# Out[10]: (5250, 14368)
-
-# X_real_train.shape
-# Out[6]: (34, 14368)
-
-# X_real_val.shape
-# Out[8]: (8, 14368)
-
-# X_real_train_val.shape
-# Out[9]: (42, 14368)
-
-
-# X_train_tun.shape
-# Out[12]: (5275, 14368)
-
-# X_val_tun.shape
-# Out[13]: (17, 14368)
-
 
 # ====================== 4. LOOCV ======================
 # Initialize lists to store LOOCV predictions
@@ -280,7 +251,6 @@ report_df = pd.DataFrame(report_dict).transpose()
 report_df.to_csv(os.path.join(RES_DIR, "s4_loocv_testSet_classification_report.csv"))
 
 # --- Save LOOCV Confusion Matrix ---
-#disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=['neg', 'pos'])
 cm = confusion_matrix(y_true_loocv, y_pred_loocv)
 disp = ConfusionMatrixDisplay(confusion_matrix=cm)
 disp.plot(cmap=plt.cm.Blues)
@@ -317,7 +287,6 @@ report_df = pd.DataFrame(report_dict).transpose()
 report_df.to_csv(os.path.join(RES_DIR, "s5_loocv_evl_classification_report.csv"))
 
 # --- Save Confusion Matrix ---
-#disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=['neg', 'pos'])
 cm = confusion_matrix(y_test, y_pred_test_loocv)
 disp = ConfusionMatrixDisplay(confusion_matrix=cm)
 disp.plot(cmap=plt.cm.Blues)
@@ -510,7 +479,6 @@ for split in splits:
             ))
         ])
         strategy_C_pipeline.fit(X_train_strategy_C, y_train_strategy_C, classifier__sample_weight=sample_weights)
-        #strategy_C_pipeline.fit(X_train_strategy_C, y_train_strategy_C, sample_weight=sample_weights)
         y_pred = strategy_C_pipeline.predict(X_val_strategy_C)
 
         cm = confusion_matrix(y_real_val, y_pred, labels=["neg", "pos"])
@@ -616,7 +584,6 @@ print(strategy_D_summary)
 threshold = 0.5
 
 # Using original training data (X_train_orig) for full-feature evaluation
-# Because above findings suggest the original split to be optimal 
 
 full_pipeline = Pipeline([
     ("scaler", StandardScaler()),
@@ -842,10 +809,9 @@ for n_features in CANDIDATE_FEATURES:
     print(f"\nEvaluating stability for {n_features} features")
     feature_counter = Counter()
     for b in range(N_BOOTSTRAP):
-        # Use .copy() for bootstrapped samples to avoid modifying X_train_orig
         idx = np.random.choice(len(X_train_orig), len(X_train_orig), replace=True)
-        X_boot = X_train_orig.iloc[idx].copy()  # <-- Add .copy() here
-        y_boot = y_train_orig.iloc[idx].copy()  # <-- Add .copy() here
+        X_boot = X_train_orig.iloc[idx].copy()  
+        y_boot = y_train_orig.iloc[idx].copy() 
         selector_pipeline = Pipeline([
             ("scaler", StandardScaler()),
             ("selector", SelectFromModel(
@@ -862,7 +828,7 @@ for n_features in CANDIDATE_FEATURES:
         ])
         selector_pipeline.fit(X_boot, y_boot)
         selector = selector_pipeline.named_steps["selector"]
-        selected = X_boot.columns[selector.get_support()]  # Use X_boot.columns
+        selected = X_boot.columns[selector.get_support()]  
         for f in selected:
             feature_counter[f] += 1
 
@@ -995,8 +961,8 @@ X_test_viz_scaled_df = pd.DataFrame(
     columns=X_test.columns,
     index=X_test.index
 )
-# Use .copy() here because columns are added to X_test_selected
-X_test_selected = X_test_viz_scaled_df[selected_feature_names].copy()  # <-- Add .copy() here
+
+X_test_selected = X_test_viz_scaled_df[selected_feature_names].copy()  
 X_test_selected["actual"] = y_test.map({"pos": 1, "neg": 0}).astype(int)
 X_test_selected["predicted"] = y_test_pred.copy()
 X_test_selected["predicted"] = X_test_selected["predicted"].map({"pos": 1, "neg": 0})

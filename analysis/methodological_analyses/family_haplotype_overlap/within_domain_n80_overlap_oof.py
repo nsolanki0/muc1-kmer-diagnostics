@@ -1,12 +1,3 @@
-
-"""
-
----
-**Note:**
-- Data paths and sensitive details are removed for sharing.
-
-"""
-
 #!/usr/bin/env python3
 
 # ====================== IMPORTS ======================
@@ -103,10 +94,10 @@ print(f"Using preprocessing: {STANDARDISATION}")
 
 # ====================== DIRECTORIES ======================
 
-RES_DIR = "/scratch/solankin/MUC1/results/reRun2/10_3sim2Dipc100Hapc200Unmerged_FullBin_N75_OOF_ZScoreC_31"
+RES_DIR = "../results"
 os.makedirs(RES_DIR, exist_ok=True)
-DATA = "/scratch/solankin/MUC1/data/KMC/sim2/sim2c200UnmergedDip/sim2c100Hapc200UnmergedDip31.csv.xz"
-FILEPATH = "/scratch/solankin/MUC1/data/KMC/sim2/"
+DATA = "../data.csv.xz"
+FILEPATH = "/path/to/data_dir/"
 
 print("Dataset: ", DATA)
 print("Result directory: ", RES_DIR)
@@ -165,8 +156,7 @@ final_df = pd.concat([filtered_pos, df_wide_neg], ignore_index=True)
 print(f"Shape of the final data: {final_df.shape}")
 
 # 5. Save the final DataFrame to a new .csv file
-#final_df.to_csv('/scratch/solankin/data/muc1_sim2/kmer_table/sim2c200UnmergedDip/sim2c200UnmergedDip75_31.csv', index=False)
-#final_df.to_csv('/scratch/solankin/data/muc1_sim2/kmer_table/sim2c200UnmergedDip/sim2c200UnmergedDip75_1_31.csv.xz', index=False, compression='xz')
+#final_df.to_csv('../data.csv.xz', index=False, compression='xz')
 
 
 pos_df0 = final_df[final_df['type'] == 'pos']

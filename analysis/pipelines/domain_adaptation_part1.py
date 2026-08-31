@@ -1,12 +1,3 @@
-
-"""
-
----
-**Note:**
-- Data paths and sensitive details are removed for sharing.
-
-"""
-
 #!/usr/bin/env python3
 
 # ====================== IMPORTS ======================
@@ -46,21 +37,11 @@ CANDIDATE_FEATURES = [100, 500, 750, 1000, 2000, 4000]
 
 # ====================== DIRECTORIES ======================
 
-RES_DIR = "/Users/sol/_courses/project_work/thesis/results/reRun2/4figures/12_1sim2Dipc100Hapc200Unmerged_FullBin_RLKMC_NormC_31"
+RES_DIR = "../results"
 os.makedirs(RES_DIR, exist_ok=True)
-DATA_REAL = "/Users/sol/_courses/project_work/thesis/data/KMC/real_260421/realCombinedUnmerged31.csv.xz"
-DATA_SIM = "/Users/sol/_courses/project_work/thesis/data/KMC/sim2/sim2c200UnmergedDip/sim2c100Hapc200UnmergedDip31.csv.xz"
 
-
-# #RES_DIR = "/Users/sol/_courses/project_work/thesis/results/reRun2/16_1_DA_P1_test1"
-# RES_DIR = "/scratch/solankin/MUC1/results/reRun2/19_8sim2Hapc200Unmerged_FullBin_RLKMC_DA_ZScoreC_31"
-# os.makedirs(RES_DIR, exist_ok=True)
-# # DATA_REAL = "/Users/sol/_courses/project_work/thesis/data/KMC/real_260421/realCombinedUnmerged31.csv.xz"
-# # DATA_SIM = "/Users/sol/_courses/project_work/thesis/data/KMC/sim2/sim2c200UnmergedDip/sim2c100Hapc200UnmergedDip31.csv.xz"
-
-# DATA_REAL = "/scratch/solankin/MUC1/data/KMC/real_260421/realCombinedUnmerged31.csv.xz"
-# DATA_SIM = "/scratch/solankin/MUC1/data/KMC/sim2/sim2Hapc200Unmerged/sim2Hapc200Unmerged31.csv.xz"
-# #DATA_SIM = "/scratch/solankin/MUC1/data/KMC/sim2/sim2c200UnmergedDip/sim2c100Hapc200UnmergedDip31.csv.xz"
+DATA_REAL = "../data_real.csv.xz"
+DATA_SIM = "../data_sim.csv.xz"
 
 print("Real dataset: ", DATA_REAL)
 print("Simulatated dataset: ", DATA_SIM)
@@ -574,7 +555,6 @@ plt.close()
 
 # ====================== 4. FEATURE SELECTION (IF BASELINE IS GOOD) ======================
 feature_counts = sorted(list(set([50, 100, 200, 500, 750, 1000, 2000, 4000, 5000])))
-#feature_counts = sorted(list(set([50, 100, 200, 500, 750, 1000, 2000, 4000, 6000, 7000])))
 
 scoring = {
     'accuracy': make_scorer(accuracy_score),
@@ -792,12 +772,7 @@ selected_features_df = pd.concat([top_25_positive, bottom_25_negative])
 selected_feature_names = selected_features_df["Feature"].tolist()
 
 # 2. Prepare scaled test data for visualization
-# viz_scaler = StandardScaler()
-# X_train_viz_scaled = viz_scaler.fit_transform(X_train)
-# X_test_viz_scaled = viz_scaler.transform(X_test)
-
-# Extract the scaler from the pipeline
-pipeline_scaler = final_pipeline.named_steps["scaler"]
+pipeline_scaler = final_pipeline.named_steps["scaler"]  # Extract the scaler from the pipeline
 X_train_viz_scaled = pipeline_scaler.transform(X_train)
 X_test_viz_scaled = pipeline_scaler.transform(X_test)
 

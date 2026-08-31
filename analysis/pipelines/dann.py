@@ -1,11 +1,3 @@
-
-"""
----
-**Note:**
-- Data paths and sensitive details are removed for sharing.
-
-"""
-
 #!/usr/bin/env python3
 
 # ====================== IMPORTS ======================
@@ -35,20 +27,14 @@ import torch.optim as optim
 RANDOM_STATE = 42
 TEST_SIZE_REAL_SPLIT = 0.5          # For splitting real data into train/val and test
 TEST_SIZE_VAL_SPLIT = 0.2           # For splitting simulated+real into train/val
-TEST_SIZE_REAL_VAL_SPLIT = 0.4      # For splitting real train/val into train/val for tuning
-N_REPEATS = 30
-VALIDATION_SIZE = 10
-N_BOOTSTRAP = 100
-FEATURE_COUNTS = [100, 500, 750, 1000, 2000, 4000, 6000, 9000, 12000]
-CANDIDATE_FEATURES = [100, 500, 750, 1000, 2000, 4000]
 
 # ====================== DIRECTORIES ======================
 
-DATA_REAL = "/scratch/solankin/MUC1/data/KMC/real_260421/realCombinedUnmerged31.csv.xz"
-DATA_SIM = "/scratch/solankin/MUC1/data/KMC/sim2/sim2c200UnmergedDip/sim2c100Hapc200UnmergedDip31.csv.xz"
-
-RES_DIR = "/scratch/solankin/MUC1/results/reRun2_t1/21_3DA3_DANN2_ZScoreC_31_260803" 
+RES_DIR = "../results"
 os.makedirs(RES_DIR, exist_ok=True)
+
+DATA_REAL = "../data_real.csv.xz"
+DATA_SIM = "../data_sim.csv.xz"
 
 print("Real dataset: ", DATA_REAL)
 print("Simulatated dataset: ", DATA_SIM)
@@ -515,7 +501,6 @@ with open(os.path.join(RES_DIR, "experiment_parameters.json"), "w") as f:
 history_df = pd.DataFrame(history)
 history_df.to_csv(os.path.join(RES_DIR, "adversarial_training_history.csv"), index=False)
 
-#history_df = pd.read_csv(os.path.join(RES_DIR, "adversarial_training_history.csv"))
 
 plt.figure(figsize=(12, 8))
 
