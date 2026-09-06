@@ -7,8 +7,8 @@
 # =============================================
 
 #SBATCH --job-name=faidx
-#SBATCH --output=/faidx_%A_%a.out
-#SBATCH --error=/faidx_%A_%a.err
+#SBATCH --output=faidx_%A_%a.out
+#SBATCH --error=faidx_%A_%a.err
 #SBATCH --time=00:10:00
 #SBATCH --mem=4G
 #SBATCH --array=1-70

@@ -7,8 +7,8 @@
 # =============================================
 
 #SBATCH --job-name=shark_reads            
-#SBATCH --output=/shark_n_c200_hap12_%A_%a.out
-#SBATCH --error=/shark_n_c200_hap12_%A_%a.err
+#SBATCH --output=shark_n_c200_hap12_%A_%a.out
+#SBATCH --error=shark_n_c200_hap12_%A_%a.err
 #SBATCH --time=00:03:00                  
 #SBATCH --mem=32G                        
 #SBATCH --ntasks=1                       

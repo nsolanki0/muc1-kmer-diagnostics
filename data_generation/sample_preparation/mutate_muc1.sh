@@ -7,8 +7,8 @@
 # =============================================
 
 #SBATCH --job-name=mutate_muc1
-#SBATCH --output=/mutate_muc1_%A_%a.out
-#SBATCH --error=/mutate_muc1_%A_%a.err
+#SBATCH --output=mutate_muc1_%A_%a.out
+#SBATCH --error=mutate_muc1_%A_%a.err
 #SBATCH --time=00:05:00
 #SBATCH --mem=4G
 #SBATCH --cpus-per-task=1

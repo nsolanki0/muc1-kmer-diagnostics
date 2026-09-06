@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #SBATCH --job-name=kmc_job
-#SBATCH --output=/kmerSimUnmergedDip_c200_1.log
+#SBATCH --output=kmerSimUnmergedDip_c200_1.log
 #SBATCH --cpus-per-task=6
 #SBATCH --mem=24G
 #SBATCH --time=06:10:00

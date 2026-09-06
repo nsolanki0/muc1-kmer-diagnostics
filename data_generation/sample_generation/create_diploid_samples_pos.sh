@@ -7,8 +7,8 @@
 # =============================================
 
 #SBATCH --job-name=createDiploid
-#SBATCH --output=/create_diploidP_%A_%a.out
-#SBATCH --error=/create_diploidP_%A_%a.err
+#SBATCH --output=create_diploidP_%A_%a.out
+#SBATCH --error=create_diploidP_%A_%a.err
 #SBATCH --time=00:05:00
 #SBATCH --mem=4G
 #SBATCH --cpus-per-task=1

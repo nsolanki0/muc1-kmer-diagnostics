@@ -2,7 +2,7 @@
 
 # =============================================
 # Script: extract_variant_coverage
-# Purpose: Extracts variant data and coverage info, by searching current directory and all its subdirectories
+# Purpose: Extracts variant data and coverage, by searching current directory and all its subdirectories
 # Author: NS
 # =============================================
 

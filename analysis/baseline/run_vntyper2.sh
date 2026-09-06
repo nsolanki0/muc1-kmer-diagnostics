@@ -7,8 +7,8 @@
 # =============================================
 
 #SBATCH --job-name=vntyper2            
-#SBATCH --output=/vntyper_pc200_Conf_dip_unsharked_%A_%a.out
-#SBATCH --error=/vntyper_pc200_Conf_dip_unsharked_%A_%a.err
+#SBATCH --output=vntyper_pc200_Conf_dip_unsharked_%A_%a.out
+#SBATCH --error=vntyper_pc200_Conf_dip_unsharked_%A_%a.err
 #SBATCH --time=00:10:00
 #SBATCH --mem=28G
 #SBATCH --cpus-per-task=4

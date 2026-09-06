@@ -7,8 +7,8 @@
 # =============================================
 
 #SBATCH --job-name=gff3_to_bed
-#SBATCH --output=/g2b_%A_%a.out
-#SBATCH --error=/g2b_%A_%a.err
+#SBATCH --output=g2b_%A_%a.out
+#SBATCH --error=g2b_%A_%a.err
 #SBATCH --time=00:01:00                  
 #SBATCH --mem=2G                         
 #SBATCH --array=1-70

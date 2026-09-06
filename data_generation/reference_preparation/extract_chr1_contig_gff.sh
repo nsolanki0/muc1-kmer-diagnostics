@@ -7,8 +7,8 @@
 # =============================================
 
 #SBATCH --job-name=extract_chr1
-#SBATCH --output=/extract_chr1_gff_%A_%a.out
-#SBATCH --error=/extract_chr1_gff_%A_%a.err
+#SBATCH --output=extract_chr1_gff_%A_%a.out
+#SBATCH --error=extract_chr1_gff_%A_%a.err
 #SBATCH --time=00:03:00           
 #SBATCH --mem=12G                 
 #SBATCH --ntasks=1

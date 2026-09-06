@@ -7,8 +7,8 @@
 # =============================================
 
 #SBATCH --job-name=neat34_sim
-#SBATCH --output=/np27dupC_c200_%A_%a.out
-#SBATCH --error=/np27dupC_c200_%A_%a.err
+#SBATCH --output=np27dupC_c200_%A_%a.out
+#SBATCH --error=np27dupC_c200_%A_%a.err
 #SBATCH --time=03:30:00
 #SBATCH --mem=128G
 #SBATCH --cpus-per-task=6
