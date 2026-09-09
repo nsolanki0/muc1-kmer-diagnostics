@@ -158,6 +158,7 @@ The principal tools and versions used in the project are:
 | minimap2 | 2.28 | Sequence alignment |
 | Sourmash | 4.9.4 | Sequence similarity and sketching |
 | VNtyper | 2.0 (Kestrel) | MUC1 baseline analysis |
+| Snakemake | 9.19.0 | Simulated data generation automation |
 
 Some tools are managed through dedicated Conda or mamba environments, while others are installed separately and invoked directly by the workflow scripts.
 
@@ -174,7 +175,7 @@ The repository includes a Snakemake workflow for automating the simulated-data a
 
 The workflow requires **Snakemake** and is configured for execution on a SLURM-managed HPC system. Snakemake coordinates the individual computational steps, manages dependencies between workflow rules, and submits computational jobs through the provided SLURM profile.
 
-The Snakemake workflow and its execution requirements are documented in [`workflow/README.md`](workflow/README.md).
+The Snakemake workflow and its execution requirements are documented in [`../workflow/README.md`](../workflow/README.md).
 
 The workflow also invokes software from the project-specific environments and standalone bioinformatics tools described above. These dependencies must be available in the execution environment before running the workflow.
 
@@ -195,8 +196,7 @@ The general setup process is:
 3. Install or configure standalone external tools that are not included in the Conda environments.
 4. Verify the relevant software versions before running the corresponding workflows.
 5. Prepare the required reference data and input files according to the relevant workflow documentation.
-6. Run the computational workflows using the Bash, Python, and SLURM scripts provided in the repository.
-
+6. Run the computational workflows using the provided Bash, Python, Snakemake, and SLURM components, as appropriate.
 
 The exact commands, parameters, and software usage are documented in the relevant workflow scripts and directory-level README files.
 

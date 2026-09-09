@@ -10,10 +10,10 @@ min_version("7.8")
 # CONFIGURATION
 # ============================================================
 # Input data
-GFF_DIR = "../workflow/gff3_release2"
-FASTA_DIR = "../workflow/data_release2"
-SCRIPTS = "../workflow/scripts"
-RESOURCES = "../workflow/resources"
+GFF_DIR = "../sdata/gff3_release2"
+FASTA_DIR = "../sdata/data_release2"
+SCRIPTS = "../sdata/scripts"
+RESOURCES = "../sdata/resources"
 
 MOTIF_FILE = os.path.join(RESOURCES, "MUC1_VNTR_typology.tsv")
 MUC1_SHARK_REFERENCE = os.path.join(RESOURCES, "muc1_seqs.fasta")
@@ -23,7 +23,7 @@ NEAT_DIR = "/home/username/NEAT-3.4"
 NEAT_PYTHON = os.environ["NEAT_PYTHON"]
 
 # Pipeline output root
-OUTPUT_BASE = "../workflow"
+OUTPUT_BASE = "../sdata"
 
 # Pipeline directories
 DISCOVERY = os.path.join(OUTPUT_BASE, "results/discovery")

@@ -78,7 +78,8 @@ For machine-learning analyses involving real sequencing data, the same feature-g
 
 For simulated data, the k-mer representation is generated from the processed reads and used by the machine-learning analyses. VNtyper2 is applied independently as a conventional baseline where required.
 
-For details of the data-generation workflow, including the alternative routes for processing simulated reads, see [`data_generation/README.md`](data_generation/README.md).
+For details of the individual data-generation components, including the alternative routes for processing simulated reads, see [`data_generation/README.md`](data_generation/README.md). For the automated workflow from reference preparation through k-mer feature generation, see 
+[`workflow/README.md`](workflow/README.md).
 
 ## Repository structure
 
@@ -98,6 +99,14 @@ For details of the data-generation workflow, including the alternative routes fo
 │
 ├── feature_generation/
 │
+├── workflow/
+│   ├── resources/
+│   ├── scripts/
+│   ├── slurm_profile/
+│   ├── Snakefile
+│   ├── submit_snakemake.sh
+│   └── README.md
+│
 ├── environment/
 │
 ├── CITATION.cff
@@ -114,6 +123,14 @@ See [`data_generation/README.md`](data_generation/README.md) for details of the 
 ### `feature_generation/`
 
 Contains the scripts used to convert the processed sequencing reads into **k-mer feature tables** used by the machine-learning analyses.
+
+### `workflow/`
+
+Contains the Snakemake workflow that automates the simulated-data generation and subsequent k-mer feature generation, from reference preparation through feature generation.
+
+The workflow integrates the relevant data-generation components and additional workflow-specific scripts into a single automated pipeline executed using **Snakemake** and **SLURM**.
+
+See [`workflow/README.md`](workflow/README.md) for workflow setup, inputs, execution, and outputs.
 
 ### `analysis/`
 
@@ -140,13 +157,19 @@ The computational workflows were developed and executed in a **Linux-based, SLUR
 
 Bash scripts are used to execute computational steps and, where appropriate, **SLURM job arrays** are used to process multiple samples in parallel. Some scripts act as wrappers around Python programs or external tools, while others implement computational workflows directly.
 
-The repository contains the workflow scripts, environment specifications, and documentation supporting reproduction of the computational analyses. Some external software and reference datasets are not distributed with the repository; their requirements and versions are documented in [`environment/README.md`](environment/README.md).
+The repository contains the workflow scripts, environment specifications, and documentation supporting reproduction of the computational analyses. The simulated-data generation and k-mer feature generation steps can be performed either using the individual scripts in data_generation/ and feature_generation/, or using the automated Snakemake workflow in workflow/.
+
+Some external software and reference datasets are not distributed with the repository; their requirements and versions are documented in [`environment/README.md`](environment/README.md).
 
 Generated sequencing data, intermediate files, and analysis outputs are not stored in the repository.
 
 ## Getting started
 
-The general workflow for reproducing the computational analysis is:
+The computational analysis can be reproduced either by running the individual data-generation and feature-generation components, or by using the Snakemake workflow to automate these steps.
+
+The individual components are documented in [`data_generation/README.md`](data_generation/README.md) and [`feature_generation/`](feature_generation/). The automated Snakemake workflow is documented in [`workflow/README.md`](workflow/README.md).
+
+If using the automated route, skip the individual steps below and follow [`workflow/README.md`](workflow/README.md) instead.
 
 1. **Set up the required software and computational environments.**  
    See [`environment/README.md`](environment/README.md).

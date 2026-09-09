@@ -53,8 +53,8 @@ start_all=$(date +%s)
 
 # Run Snakemake with SLURM cluster support
 snakemake \
-    --snakefile ../sdata/Snakefile \
-    --profile ../sdata/slurm_profile \
+    --snakefile ../workflow/Snakefile \
+    --profile ../workflow/slurm_profile \
     all
 
 status=$?
