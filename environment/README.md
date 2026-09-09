@@ -58,13 +58,13 @@ conda activate <environment_name>
 
 The requirements for creating a NEAT-3.4 conda environment are:
 
-* python >= 3.8
-* biopython == 1.79
-* matplotlib >= 3.3.4 (optional, for plotting utilities)
-* matplotlib-venn >= 0.11.6 (optional, for plotting utilities)
-* pandas >= 1.2.1
-* numpy >= 1.22.2
-* pysam >= 0.16.0.1
+- python >= 3.8
+- biopython == 1.79
+- matplotlib >= 3.3.4 (optional, for plotting utilities)
+- matplotlib-venn >= 0.11.6 (optional, for plotting utilities)
+- pandas >= 1.2.1
+- numpy >= 1.22.2
+- pysam >= 0.16.0.1
 
 To setup the environment:
 

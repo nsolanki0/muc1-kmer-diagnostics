@@ -274,10 +274,10 @@ The workflow implements the simulation and preprocessing steps used in the study
 
 Detailed explanations of:
 
-* the construction of positive and negative datasets
-* the generation of diploid/child samples
-* the rationale for the two negative-sample categories
-* the biological and methodological motivation for the simulation design
-* subsequent analytical use of the simulated datasets
+- the construction of positive and negative datasets
+- the generation of diploid/child samples
+- the rationale for the two negative-sample categories
+- the biological and methodological motivation for the simulation design
+- subsequent analytical use of the simulated datasets
 
 are provided in the accompanying MSc thesis.
