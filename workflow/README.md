@@ -227,7 +227,7 @@ The SLURM profile is explicitly supplied using:
 
 The profile directory contains its own config.yaml, which controls Snakemake's interaction with SLURM.
 
-**Note:** The paths used within the Snakefile and submission script (e.g., `../workflow/resources/` or `../workflow/scripts/`) must be adjusted to the corresponding location of the `workflow/` directory on the HPC system.
+> **Note:** The paths used within the Snakefile and submission script (e.g., `../workflow/resources/` or `../workflow/scripts/`) must be adjusted to the corresponding location of the `workflow/` directory on the HPC system.
 
 The workflow can be submitted with:
 
