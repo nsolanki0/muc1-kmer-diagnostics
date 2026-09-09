@@ -1,15 +1,12 @@
 # Snakemake Workflow
-
 This directory contains the Snakemake workflow used to generate the simulated _MUC1_ sequencing data and the final k-mer count tables.
 
 The workflow is designed for execution on an HPC system using **Snakemake** with **SLURM.**
 
 ## Before running the workflow
-
 Two prerequisites should be prepared before submitting the workflow.
 
 **1. Copy the required Python scripts**
-
 The Snakemake workflow uses Python scripts developed as part of the `data_generation` component of the project.
 
 Before running the workflow, the required Python scripts should be copied into:
@@ -31,14 +28,12 @@ scripts/
 ├── validate_sharked_pairs.py
 └── make_kmc_sample_manifest.py
 ```
-
 The first four scripts originate from the `data_generation` component of the project; the remaining scripts support later stages of the Snakemake workflow.
 
 The workflow expects these scripts to be available in the `scripts/` directory of the 
 `sdata` working directory.
 
 **2. Set up the NEAT Python environment**
-
 The workflow uses NEAT 3.4 for read simulation and requires the Python from the corresponding Conda environment.
 
 The required environment must therefore be activated before running Snakemake, and `NEAT_PYTHON` must point to the Python executable in that environment.
@@ -51,8 +46,12 @@ conda activate neat34
 
 export NEAT_PYTHON="$CONDA_PREFIX/bin/python"
 ```
-
 The detailed setup and explanation of the NEAT environment are provided in the `environment/README.md`. 
+
+## Running the workflow
+The current version of the workflow uses relative paths based on a working directory called `sdata`.
+
+Therefore, the workflow should be run from an `sdata` directory containing the required input data and workflow files.
 
 The expected structure is:
 
@@ -73,7 +72,6 @@ The exact contents of the input and output directories depend on the datasets be
 **Note:** The Git repository stores the workflow components under `workflow/`. The current Snakefile uses paths relative to an `sdata` working directory, so the repository contents should be placed or made available within the corresponding `sdata` structure when running the pipeline.
 
 ## Required input data
-
 The pipeline requires paired FASTA and GFF files for each sample.
 
 For example, a sample may consist of:
@@ -103,18 +101,15 @@ For example:
 ```text
 GCA_041900145.1
 ```
-
 identifies the pair:
 
 ```text
 GCA_041900145.1.unmasked.fa.gz
 GCA_041900145.1.gff3.gz
 ```
-
 Both files are required for the corresponding sample to be processed.
 
 ## Sample lists
-
 The `.txt` files in `resources/` contain sample identifiers rather than complete filenames.
 
 For example:
@@ -123,7 +118,6 @@ For example:
 GCA_041900145.1
 GCA_041900165.1
 ```
-
 These identifiers correspond to the FASTA/GFF pairs described above.
 
 The sample lists determine which samples are used for the different parts of the simulation workflow.
@@ -141,7 +135,6 @@ resources/
 ├── MUC1_VNTR_typology.tsv
 └── muc1_seqs.fasta
 ```
-
 The two negative sample groups (`negative_*_list.txt` and `negative_*_list2.txt`) represent the two negative-sample categories used for data generation in the study.
 
 The rationale for the construction of the positive and negative datasets, including the generation of diploid/child samples and the distinction between the two negative categories, is described in the accompanying MSc thesis.
@@ -160,8 +153,7 @@ workflow/
 └── resources/
 ```
 
-**`Snakefile`**
-
+### `Snakefile`
 Defines the complete Snakemake workflow, including:
 * identification of MUC1-containing contigs
 * matching FASTA and GFF files
@@ -176,33 +168,27 @@ Defines the complete Snakemake workflow, including:
 * KMC k-mer counting
 * k-mer count tables generation
 
-**`scripts/`**
-
+### `scripts/`
 Contains the Python scripts used by individual workflow steps. Some of these scripts originate from the `data_generation` component of the project.
 
-**`resources/`**
-
+### `resources/`
 Contains sample lists and reference/resource files required by the workflow.
 
-**`slurm_profile/`**
-
+### `slurm_profile/`
 Contains the Snakemake SLURM profile:
 
 ```text
 slurm_profile/
 └── config.yaml
 ```
-
 The profile specifies the SLURM executor and default cluster resources.
 
 ## SLURM execution
-
 The workflow is launched using the submission script:
 
 ```text
 submit_snakemake.sh
 ```
-
 The script activates the required environment and loads Snakemake before starting the workflow.
 
 The workflow is then run with:
@@ -213,13 +199,11 @@ snakemake \
     --profile ../sdata/slurm_profile \
     all
 ```
-
 The SLURM profile is explicitly supplied using:
 
 ```text
 --profile ../sdata/slurm_profile
 ```
-
 The profile directory contains its own config.yaml, which controls Snakemake's interaction with SLURM.
 
 **Note:** All instances of paths (e.g., `../sdata`) in the submission script as well as in the Snakefile must be completed with actual paths.
@@ -231,7 +215,6 @@ sbatch submit_snakemake.sh
 ```
 
 ## SLURM profile configuration
-
 The current profile contains:
 
 ```text
@@ -247,11 +230,9 @@ default-resources:
 latency-wait: 60
 restart-times: 3
 ```
-
 Individual workflow rules also specify their own resource requirements where appropriate.
 
 ## Outputs
-
 The workflow generates intermediate files and manifests as it progresses through the pipeline.
 
 The final targets are the k-mer count tables for the two k-mer lengths (23 and 31):
@@ -260,11 +241,9 @@ The final targets are the k-mer count tables for the two k-mer lengths (23 and 3
 KmerTable/kmerCombinedUnmerged23.csv
 KmerTable/kmerCombinedUnmerged31.csv
 ```
-
 These contain the k-mer counts generated from the validated simulated samples.
 
 ## Methodological details
-
 The workflow implements the simulation and preprocessing steps used in the study.
 
 Detailed explanations of:
