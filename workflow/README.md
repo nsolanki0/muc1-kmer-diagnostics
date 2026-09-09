@@ -16,12 +16,10 @@ Before running the workflow, the required Python scripts should be copied into:
 
 ```text
 sdata/scripts/
-
 ```
 The scripts used by the workflow include:
 
 ```text
-
 scripts/
 ├── extract_chr1_contig.py
 ├── extract_chr1_contig_gff.py
@@ -32,7 +30,6 @@ scripts/
 ├── validate_diploid_pairs.py
 ├── validate_sharked_pairs.py
 └── make_kmc_sample_manifest.py
-
 ```
 
 The first four scripts originate from the `data_generation` component of the project; the remaining scripts support later stages of the Snakemake workflow.
@@ -49,12 +46,10 @@ The required environment must therefore be activated before running Snakemake, a
 The submission script performs this setup using:
 
 ```text
-
 cd /home/username/NEAT-3.4
 conda activate neat34
 
 export NEAT_PYTHON="$CONDA_PREFIX/bin/python"
-
 ```
 
 The detailed setup and explanation of the NEAT environment are provided in the `environment/README.md`. 
@@ -62,7 +57,6 @@ The detailed setup and explanation of the NEAT environment are provided in the `
 The expected structure is:
 
 ```text
-
 sdata/
 ├── Snakefile
 ├── submit_snakemake.sh
@@ -73,7 +67,6 @@ sdata/
 ├── gff3_release2/
 ├── data_release2/
 └── ...
-
 ```
 The exact contents of the input and output directories depend on the datasets being processed.
 
@@ -86,15 +79,12 @@ The pipeline requires paired FASTA and GFF files for each sample.
 For example, a sample may consist of:
 
 ```text
-
 GCA_041900145.1.unmasked.fa.gz
 GCA_041900145.1.gff3.gz
-
 ```
 The corresponding files should be placed in the appropriate input directories:
 
 ```text
-
 sdata/
 ├── data_release2/
 │   ├── GCA_041900145.1.unmasked.fa.gz
@@ -105,25 +95,20 @@ sdata/
     ├── GCA_041900145.1.gff3.gz
     ├── GCA_041900165.1.gff3.gz
     └── ...
-
 ```
 The FASTA and GFF files are matched using their accession identifiers.
 
 For example:
 
 ```text
-
 GCA_041900145.1
-
 ```
 
 identifies the pair:
 
 ```text
-
 GCA_041900145.1.unmasked.fa.gz
 GCA_041900145.1.gff3.gz
-
 ```
 
 Both files are required for the corresponding sample to be processed.
@@ -135,10 +120,8 @@ The `.txt` files in `resources/` contain sample identifiers rather than complete
 For example:
 
 ```text
-
 GCA_041900145.1
 GCA_041900165.1
-
 ```
 
 These identifiers correspond to the FASTA/GFF pairs described above.
@@ -148,7 +131,6 @@ The sample lists determine which samples are used for the different parts of the
 The current resource files include:
 
 ```text
-
 resources/
 ├── positive_mat_list.txt
 ├── positive_pat_list.txt
@@ -158,7 +140,6 @@ resources/
 ├── negative_pat_list2.txt
 ├── MUC1_VNTR_typology.tsv
 └── muc1_seqs.fasta
-
 ```
 
 The two negative sample groups (`negative_*_list.txt` and `negative_*_list2.txt`) represent the two negative-sample categories used for data generation in the study.
@@ -170,7 +151,6 @@ The rationale for the construction of the positive and negative datasets, includ
 The main components are:
 
 ```text
-
 workflow/
 ├── Snakefile
 ├── submit_snakemake.sh
@@ -178,7 +158,6 @@ workflow/
 │   └── config.yaml
 ├── scripts/
 └── resources/
-
 ```
 
 **`Snakefile`**
@@ -210,10 +189,8 @@ Contains sample lists and reference/resource files required by the workflow.
 Contains the Snakemake SLURM profile:
 
 ```text
-
 slurm_profile/
 └── config.yaml
-
 ```
 
 The profile specifies the SLURM executor and default cluster resources.
@@ -223,9 +200,7 @@ The profile specifies the SLURM executor and default cluster resources.
 The workflow is launched using the submission script:
 
 ```text
-
 submit_snakemake.sh
-
 ```
 
 The script activates the required environment and loads Snakemake before starting the workflow.
@@ -233,20 +208,16 @@ The script activates the required environment and loads Snakemake before startin
 The workflow is then run with:
 
 ```text
-
 snakemake \
     --snakefile ../sdata/Snakefile \
     --profile ../sdata/slurm_profile \
     all
-
 ```
 
 The SLURM profile is explicitly supplied using:
 
 ```text
-
 --profile ../sdata/slurm_profile
-
 ```
 
 The profile directory contains its own config.yaml, which controls Snakemake's interaction with SLURM.
@@ -256,9 +227,7 @@ The profile directory contains its own config.yaml, which controls Snakemake's i
 The workflow can be submitted with:
 
 ```text
-
 sbatch submit_snakemake.sh
-
 ```
 
 ## SLURM profile configuration
@@ -266,7 +235,6 @@ sbatch submit_snakemake.sh
 The current profile contains:
 
 ```text
-
 executor: slurm
 
 jobs: 100
@@ -278,7 +246,6 @@ default-resources:
 
 latency-wait: 60
 restart-times: 3
-
 ```
 
 Individual workflow rules also specify their own resource requirements where appropriate.
@@ -290,10 +257,8 @@ The workflow generates intermediate files and manifests as it progresses through
 The final targets are the k-mer count tables for the two k-mer lengths (23 and 31):
 
 ```text
-
 KmerTable/kmerCombinedUnmerged23.csv
 KmerTable/kmerCombinedUnmerged31.csv
-
 ```
 
 These contain the k-mer counts generated from the validated simulated samples.
