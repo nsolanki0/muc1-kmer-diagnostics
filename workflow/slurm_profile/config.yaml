@@ -1,0 +1,12 @@
+executor: slurm
+
+jobs: 100
+
+default-resources:
+    slurm_partition: std
+    mem_mb: 8192
+    runtime: 1440
+
+latency-wait: 60
+restart-times: 3
+
