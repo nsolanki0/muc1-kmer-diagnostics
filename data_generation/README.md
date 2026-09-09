@@ -2,11 +2,15 @@
 
 This directory contains the computational workflows used to generate the simulated _MUC1_ sequencing data used in the downstream analyses.
 
-The data-generation workflow prepares the genomic reference, generates positive and negative sequence material, simulates sequencing reads, constructs haplotype-mixture (diploid-like) samples, and processes the resulting reads for downstream analysis.
+The data-generation process prepares the genomic reference, generates positive and negative sequence material, simulates sequencing reads, constructs haplotype-mixture (diploid-like) samples, and processes the resulting reads for downstream analysis.
+
+The scripts in this directory implement the individual data-generation steps used by the project. These steps are also integrated into the Snakemake workflow in `../workflow/`, which provides an automated and reproducible route from reference preparation through processed _MUC1_ reads and subsequent k-mer counting.
+
+This README describes the purpose and organisation of the individual data-generation components. For instructions on running the complete automated pipeline, including the transition from data generation to k-mer feature generation, see [`../workflow/README.md`](../workflow/README.md).
 
 ## Workflow
 
-The data-generation workflow consists of several stages:
+The data-generation process consists of several stages:
 
 ```text
 Reference genome
@@ -80,7 +84,7 @@ The main mutation-generation workflow is implemented using `mutate_muc1.py` and 
 
 ### `read_simulation/`
 
-Contains scripts used to simulate sequencing reads and to filter/extract _MUC1_-related reads for downstream analysis.
+Contains scripts used to simulate sequencing reads, and to filter and extract _MUC1_-related reads for downstream analysis.
 
 The workflow includes:
 
@@ -102,20 +106,22 @@ The `submit_positive.sh` and `submit_negative.sh` scripts are used for SLURM job
 
 ## Computational environment
 
-The data-generation workflows were developed and executed in a Linux-based, SLURM-managed computing environment.
+The data-generation components were developed and executed in a Linux-based, SLURM-managed computing environment.
 
-Several workflows use SLURM job arrays to process multiple samples in parallel. Bash scripts may act as wrappers around Python programs or external tools and may contain SLURM configuration required for batch execution.
+Several components use SLURM job arrays to process multiple samples in parallel. Bash scripts may act as wrappers around Python programs or external tools and may contain SLURM configuration required for batch execution.
 
 Software environments and external tool requirements are documented in [`../environment/README.md`](../environment/README.md).
 
 ## Outputs
 
-The main output of the data-generation workflow is a set of processed simulated sequencing reads representing the generated _MUC1_ samples.
+The main output of the data-generation process is a set of processed simulated sequencing reads representing the generated _MUC1_ samples.
 
-These processed reads are subsequently used for:
+These processed reads are subsequently used for two downstream analysis branches:
 
-1. **k-mer feature generation**, using the workflow in [`../feature_generation/`](../feature_generation/); and
-2. **VNtyper2 baseline analysis**, using the workflow in [`../analysis/baseline/`](../analysis/baseline/).
+1. **k-mer feature generation**, using the script in [`../feature_generation/`](../feature_generation/), producing the k-mer count tables used by the machine-learning analyses; and
+2. **VNtyper2 baseline analysis**, using the workflow in [`../analysis/baseline/`](../analysis/baseline/), which operates directly on the processed sequencing reads.
+
+When the Snakemake workflow is used, the processed reads are automatically passed to the subsequent k-mer feature-generation steps. The complete automated pipeline from reference preparation through k-mer counting is documented in [`../workflow/README.md`](../workflow/README.md).
 
 Generated sequencing data and intermediate files are not stored in the repository.
 
@@ -123,12 +129,13 @@ Generated sequencing data and intermediate files are not stored in the repositor
 
 The individual scripts contain the commands, parameters, and SLURM configuration required for their respective computational steps.
 
-The main data-generation workflow proceeds through:
+The individual data-generation components include:
 
 1. `reference_preparation/`
 2. `sample_preparation/`
 3. `read_simulation/`
+4. `sample_generation/`
 
 Depending on the downstream analysis, simulated reads can either be filtered directly using `filter_muc1_reads.sh`, or first processed through `sample_generation/` to construct haplotype-mixture (diploid-like) samples before _MUC1_ read filtering.
 
-Before running the workflows, ensure that the required software, reference data, and computational environments have been prepared. See [`../environment/README.md`](../environment/README.md).
+Before running the individual components or the Snakemake workflow, ensure that the required software, reference data, and computational environments have been prepared. See [`../environment/README.md`](../environment/README.md).

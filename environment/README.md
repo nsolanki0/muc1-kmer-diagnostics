@@ -169,6 +169,15 @@ Users are responsible for consulting the respective software documentation and l
 
 The software versions used for the analyses are documented above to support reproducibility. External software is not necessarily distributed with this repository.
 
+### Snakemake Workflow
+The repository includes a Snakemake workflow for automating the simulated-data and k-mer feature-generation pipeline.
+
+The workflow requires **Snakemake** and is configured for execution on a SLURM-managed HPC system. Snakemake coordinates the individual computational steps, manages dependencies between workflow rules, and submits computational jobs through the provided SLURM profile.
+
+The Snakemake workflow and its execution requirements are documented in [`workflow/README.md`](workflow/README.md).
+
+The workflow also invokes software from the project-specific environments and standalone bioinformatics tools described above. These dependencies must be available in the execution environment before running the workflow.
+
 ### Workflow Automation and HPC
 Bash scripting is used for workflow automation, file management, and SLURM job submission.
 

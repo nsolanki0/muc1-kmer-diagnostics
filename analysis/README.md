@@ -4,7 +4,10 @@ This directory contains the downstream computational analyses developed to evalu
 
 The analyses use simulated and real sequencing data, depending on the experimental setting. These include within-domain evaluation, domain transfer, domain adaptation, and domain-adversarial learning experiments.
 
-The simulated sequencing data are generated using the [`../data_generation/`](../data_generation/) workflow. K-mer feature tables generated from the relevant sequencing data are used as input for the machine-learning analyses, while VNtyper2 is applied independently as a conventional analysis baseline.
+For simulated data, the sequencing data and k-mer feature tables can be generated using the Snakemake workflow in [`workflow/README.md`](workflow/README.md).
+Similarly, the simulated sequencing data can be generated using the data-generation components [`../data_generation/`](../data_generation/), which can then be used to generate the K-mer feature tables using `feature_generation`.
+
+K-mer feature tables generated from the relevant sequencing data are used as input for the machine-learning analyses, while VNtyper2 is applied independently as a conventional analysis baseline.
 
 ## Analysis workflow
 
@@ -154,7 +157,7 @@ Not all software used by the analyses is included in the Conda environment speci
 
 The individual analysis scripts contain the commands, parameters, and configuration required for their respective analyses.
 
-The required input data depend on the experimental setting. Simulated data are generated using [`../data_generation/`](../data_generation/), while real sequencing data are used directly where specified by the corresponding analysis.
+The required input data depend on the experimental setting. Simulated data are generated using either [`workflow/README.md`](workflow/README.md) or [`../data_generation/`](../data_generation/), while real sequencing data are used directly where specified by the corresponding analysis.
 
 For analyses using k-mer representations, k-mer feature tables are generated using [`../feature_generation/`](../feature_generation/).
 
