@@ -4,8 +4,9 @@ This directory contains the downstream computational analyses developed to evalu
 
 The analyses use simulated and real sequencing data, depending on the experimental setting. These include within-domain evaluation, domain transfer, domain adaptation, and domain-adversarial learning experiments.
 
-For simulated data, the sequencing data and k-mer feature tables can be generated using the Snakemake workflow in [`workflow/README.md`](workflow/README.md).
-Similarly, the simulated sequencing data can be generated using the data-generation components [`../data_generation/`](../data_generation/), which can then be used to generate the K-mer feature tables using `feature_generation`.
+For simulated data, the sequencing data and k-mer feature tables can be generated using the Snakemake workflow in [`../workflow/README.md`](../workflow/README.md).
+
+Alternatively, simulated sequencing data can be generated using the data-generation components in [`../data_generation/`](../data_generation/), followed by k-mer feature generation using [`../feature_generation/`](../feature_generation/).
 
 K-mer feature tables generated from the relevant sequencing data are used as input for the machine-learning analyses, while VNtyper2 is applied independently as a conventional analysis baseline.
 
@@ -119,7 +120,7 @@ The VNtyper2 analysis is independent of the k-mer feature-generation and machine
 
 The machine-learning analyses use k-mer feature tables generated from the relevant sequencing data.
 
-The feature-generation workflow is located in [`../feature_generation/`](../feature_generation/).
+The feature-generation script, `generate_kmer.sh`, is located in [`../feature_generation/`](../feature_generation/).
 
 For simulated data, the relationship between the workflows is:
 
@@ -139,7 +140,7 @@ K-mer feature tables
 Machine-learning analyses
 ```
 
-The same feature-generation workflow can also be applied to real sequencing data used in the relevant experiments. Thus, k-mer feature tables may be generated from either simulated or real sequencing data, depending on the experimental setting.
+The same feature-generation script can also be applied to real sequencing data used in the relevant experiments. Thus, k-mer feature tables may be generated from either simulated or real sequencing data, depending on the experimental setting.
 
 The VNtyper2 baseline uses sequencing data independently and does not require the k-mer feature tables.
 
@@ -157,13 +158,13 @@ Not all software used by the analyses is included in the Conda environment speci
 
 The individual analysis scripts contain the commands, parameters, and configuration required for their respective analyses.
 
-The required input data depend on the experimental setting. Simulated data are generated using either [`workflow/README.md`](workflow/README.md) or [`../data_generation/`](../data_generation/), while real sequencing data are used directly where specified by the corresponding analysis.
+The required input data depend on the experimental setting. Simulated data are generated using either the Snakemake workflow described in [`../workflow/README.md`](../workflow/README.md) or the data-generation components in [`../data_generation/`](../data_generation/), while real sequencing data are used directly where specified by the corresponding analysis.
 
 For analyses using k-mer representations, k-mer feature tables are generated using [`../feature_generation/`](../feature_generation/).
 
 The general workflow is:
 
-1. **Prepare the required sequencing data**, either through the [`../data_generation/`](../data_generation/) workflow or using the appropriate real sequencing data.
+1. **Prepare the required sequencing data**, either using the Snakemake workflow in [`../workflow/README.md`](../workflow/README.md), the individual data-generation components in [`../data_generation/`](../data_generation/), or the appropriate real sequencing data.
 2. **Generate k-mer feature tables** using [`../feature_generation/`](../feature_generation/) where required.
 3. **Run the relevant machine-learning pipeline or targeted/methodological analysis.**
 4. **Run the VNtyper2 baseline** where required for comparison.
