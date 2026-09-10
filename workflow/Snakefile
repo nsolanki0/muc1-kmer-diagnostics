@@ -9,6 +9,7 @@ min_version("7.8")
 # ============================================================
 # CONFIGURATION
 # ============================================================
+
 # Input data
 GFF_DIR = "../workflow/gff3_release2"
 FASTA_DIR = "../workflow/data_release2"
@@ -107,6 +108,7 @@ ALL_SAMPLES = POS_SAMPLES + NEG_SAMPLES
 # ============================================================
 # STEP 1: Find MUC1 contigs in GFF files
 # ============================================================
+
 rule find_muc1_contigs:
     input:
         gff_dir=GFF_DIR
@@ -127,6 +129,7 @@ rule find_muc1_contigs:
 # ============================================================
 # STEP 2: Match FASTA and GFF paths
 # ============================================================
+
 checkpoint match_fasta_gff:
     input:
         gff_contigs=rules.find_muc1_contigs.output
@@ -157,6 +160,7 @@ checkpoint match_fasta_gff:
 # ============================================================
 # STEP 3 & 4: Extract chr1 contig (FASTA + GFF)
 # ============================================================
+
 # --- Get samples dynamically from Step 2 ---
 def get_muc1_samples(wildcards):
     matched_file = checkpoints.match_fasta_gff.get().output[0]
@@ -253,6 +257,7 @@ rule extract_chr1_contig:
 # ============================================================
 # STEP 5: Create FASTA/GFF pairs manifest
 # ============================================================
+
 def chr1_outputs(wildcards):
     samples = get_muc1_samples(wildcards)
     outputs = []
@@ -302,6 +307,7 @@ rule make_chr1_fa_gff_manifest:
 # ============================================================
 # STEP 6: Mutate MUC1 (Positive Samples)
 # ============================================================
+
 rule mutate_positive:
     input:
         pairs=STEP5_PAIRS
@@ -403,6 +409,7 @@ POSITIVE_MANIFESTS = [
 # ============================================================
 # STEP 7: GFF to BED (Negative Samples)
 # ============================================================
+
 rule negative_gff_to_bed:
     input:
         pairs=STEP5_PAIRS
@@ -448,6 +455,7 @@ WT_BEDS = [
 # ============================================================
 # STEP 8A: Index positive mutated FASTAs
 # ============================================================
+
 rule index_positive_fasta:
     input:
         manifest=f"{POS_MANIFEST_DIR}/{{sample}}.txt"
@@ -486,6 +494,7 @@ rule index_positive_fasta:
 # ============================================================
 # STEP 8B: Index WT FASTA files for negative samples
 # ============================================================
+
 rule index_negative_wt_fasta:
     input:
         fasta=f"{CHR1_DATA}/{{sample}}_chr1.fa"
@@ -511,6 +520,7 @@ rule index_negative_wt_fasta:
 # ============================================================
 # STEP 9A: Create positive BED/FASTA manifest
 # ============================================================
+
 rule make_positive_neat_manifest:
     input:
         mutation_manifest=f"{POS_MANIFEST_DIR}/{{sample}}.txt",
@@ -543,6 +553,7 @@ rule make_positive_neat_manifest:
 # ============================================================
 # STEP 9B: Create negative BED/FASTA manifest
 # ============================================================
+
 rule make_negative_neat_manifest:
     input:
         bed=f"{WT_DATA}/{{sample}}_chr1.bed",
@@ -563,6 +574,7 @@ rule make_negative_neat_manifest:
 # ============================================================
 # STEP 10A: NEAT simulation — positive samples
 # ============================================================
+
 rule neat_positive:
     input:
         manifest=f"{NEAT_MANIFEST_DIR}/positive_{{sample}}.txt"
@@ -614,6 +626,7 @@ rule neat_positive:
 # ============================================================
 # STEP 10B: NEAT simulation — negative samples
 # ============================================================
+
 rule neat_negative:
     input:
         manifest=f"{NEAT_MANIFEST_DIR}/negative_{{sample}}.txt"
@@ -665,6 +678,7 @@ rule neat_negative:
 # ============================================================
 # STEP 11A: Create positive diploid combination manifest
 # ============================================================
+
 checkpoint make_positive_diploid_manifest:
     input:
         pos_mat=POS_MAT,
@@ -719,6 +733,7 @@ checkpoint make_positive_diploid_manifest:
 # ============================================================
 # STEP 11B: Create negative diploid combination manifest
 # ============================================================
+
 checkpoint make_negative_diploid_manifest:
     input:
         neg_mat=NEG_MAT,
@@ -772,6 +787,7 @@ checkpoint make_negative_diploid_manifest:
 # ============================================================
 # STEP 11C: Diploid manifest readers
 # ============================================================
+
 def positive_diploid_pairs(wildcards):
     manifest = checkpoints.make_positive_diploid_manifest.get().output.manifest
     pairs = []
@@ -838,6 +854,7 @@ def get_negative_diploid_inputs(wildcards):
 # ============================================================
 # STEP 11D: Create positive diploid FASTQ pairs
 # ============================================================
+
 rule create_diploid_positive:
     input:
         r1a=lambda wc: get_positive_diploid_inputs(wc)[0],
@@ -884,6 +901,7 @@ rule create_diploid_positive:
 # ============================================================
 # STEP 11E: Create negative diploid FASTQ pairs
 # ============================================================
+
 rule create_diploid_negative:
     input:
         r1a=lambda wc: get_negative_diploid_inputs(wc)[0],
@@ -930,6 +948,7 @@ rule create_diploid_negative:
 # ============================================================
 # STEP 13: Validate diploid FASTQ pairs
 # ============================================================
+
 def positive_diploid_fastq_outputs(wildcards):
     manifest = checkpoints.make_positive_diploid_manifest.get().output.manifest
     outputs = []
@@ -1011,6 +1030,7 @@ checkpoint validate_negative_diploid:
 #
 # They do NOT determine Sharked validity.
 # ============================================================
+
 def validated_positive_pair_ids(wildcards):
     manifest = checkpoints.validate_positive_diploid.get().output.manifest
     pair_ids = []
@@ -1045,8 +1065,17 @@ def validated_negative_pair_ids(wildcards):
 # ============================================================
 # STEP 14B: Shark positive diploid pairs
 #
-# Only pairs passing Step 13 are allowed to reach this rule.
+# Step 13 determines WHICH pairs should be Sharked.
+#
+# IMPORTANT:
+# A failure of Shark for one pair does NOT fail the workflow.
+# Instead, that pair receives:
+#
+#     status = FAILED
+#
+# and is filtered out later by Step 14D.
 # ============================================================
+
 rule shark_positive:
     input:
         r1=lambda wc: f"{DIPLOID_POS}/{wc.pair_id}_read1.fq.gz",
@@ -1054,8 +1083,8 @@ rule shark_positive:
     output:
         r1=f"{SHARKED_POS}/{{pair_id}}_sharked_read1.fq",
         r2=f"{SHARKED_POS}/{{pair_id}}_sharked_read2.fq",
-        ssv=f"{SHARKED_POS}/{{pair_id}}.ssv"
-
+        ssv=f"{SHARKED_POS}/{{pair_id}}.ssv",
+        status=f"{SHARKED_POS}/{{pair_id}}.shark.status"
     params:
         reference=MUC1_SHARK_REFERENCE
 
@@ -1067,35 +1096,80 @@ rule shark_positive:
 
     shell:
         r"""
-        set -euo pipefail
+        set -u
 
         mkdir -p "{SHARKED_POS}"
 
         echo "=================================================="
         echo "Sharking positive pair"
-        echo "Pair ID: {wildcards.pair_id}"
-        echo "R1:      {input.r1}"
-        echo "R2:      {input.r2}"
+        echo "Pair ID:   {wildcards.pair_id}"
+        echo "R1:        {input.r1}"
+        echo "R2:        {input.r2}"
         echo "Reference: {params.reference}"
         echo "=================================================="
 
+        # Remove stale outputs from a previous attempt.
+        rm -f \
+            "{output.r1}" \
+            "{output.r2}" \
+            "{output.ssv}" \
+            "{output.status}"
+
         module load shark/1.2.0/gcc
 
-        shark \
+        # ----------------------------------------------------
+        # Run Shark.
+        #
+        # IMPORTANT:
+        # Do NOT use "set -e" here because a Shark failure is
+        # being treated as a pair-level failure, not a workflow
+        # failure.
+        # ----------------------------------------------------
+        if shark \
             -r "{params.reference}" \
             -1 "{input.r1}" \
             -2 "{input.r2}" \
             -o "{output.r1}" \
             -p "{output.r2}" \
-            > "{output.ssv}"
+            > "{output.ssv}" 2>&1
+        then
+
+            echo "OK" > "{output.status}"
+
+            echo "Shark completed successfully:"
+            echo "{wildcards.pair_id}"
+
+        else
+
+            echo "FAILED" > "{output.status}"
+
+            echo "WARNING: Shark failed for pair:"
+            echo "{wildcards.pair_id}" >&2
+
+            # The SSV remains as a diagnostic record.
+            # FASTQs are removed so they cannot accidentally
+            # be interpreted as usable Sharked data.
+            rm -f \
+                "{output.r1}" \
+                "{output.r2}"
+
+        fi
+
+        # ----------------------------------------------------
+        # IMPORTANT:
+        # Always exit 0.
+        #
+        # Shark failure is recorded in .shark.status and will
+        # be filtered by Step 14D.
+        # ----------------------------------------------------
+        exit 0
         """
 
 
 # ============================================================
 # STEP 14C: Shark negative diploid pairs
-#
-# Only pairs passing Step 13 are allowed to reach this rule.
 # ============================================================
+
 rule shark_negative:
     input:
         r1=lambda wc: f"{DIPLOID_NEG}/{wc.pair_id}_read1.fq.gz",
@@ -1103,8 +1177,8 @@ rule shark_negative:
     output:
         r1=f"{SHARKED_NEG}/{{pair_id}}_sharked_read1.fq",
         r2=f"{SHARKED_NEG}/{{pair_id}}_sharked_read2.fq",
-        ssv=f"{SHARKED_NEG}/{{pair_id}}.ssv"
-
+        ssv=f"{SHARKED_NEG}/{{pair_id}}.ssv",
+        status=f"{SHARKED_NEG}/{{pair_id}}.shark.status"
     params:
         reference=MUC1_SHARK_REFERENCE
 
@@ -1116,179 +1190,125 @@ rule shark_negative:
 
     shell:
         r"""
-        set -euo pipefail
+        set -u
 
         mkdir -p "{SHARKED_NEG}"
 
         echo "=================================================="
         echo "Sharking negative pair"
-        echo "Pair ID: {wildcards.pair_id}"
-        echo "R1:      {input.r1}"
-        echo "R2:      {input.r2}"
+        echo "Pair ID:   {wildcards.pair_id}"
+        echo "R1:        {input.r1}"
+        echo "R2:        {input.r2}"
         echo "Reference: {params.reference}"
         echo "=================================================="
 
+        rm -f \
+            "{output.r1}" \
+            "{output.r2}" \
+            "{output.ssv}" \
+            "{output.status}"
+
         module load shark/1.2.0/gcc
 
-        shark \
+        if shark \
             -r "{params.reference}" \
             -1 "{input.r1}" \
             -2 "{input.r2}" \
             -o "{output.r1}" \
             -p "{output.r2}" \
-            > "{output.ssv}"
+            > "{output.ssv}" 2>&1
+        then
+
+            echo "OK" > "{output.status}"
+
+            echo "Shark completed successfully:"
+            echo "{wildcards.pair_id}"
+
+        else
+
+            echo "FAILED" > "{output.status}"
+
+            echo "WARNING: Shark failed for pair:"
+            echo "{wildcards.pair_id}" >&2
+
+            rm -f \
+                "{output.r1}" \
+                "{output.r2}"
+
+        fi
+
+        exit 0
         """
 
 
 # ============================================================
-# STEP 14D: Validate Sharked positive FASTQ pairs
+# STEP 14D-PREP:
+# Determine the Shark status outputs that must exist for all
+# positive pairs selected by Step 13.
 #
 # IMPORTANT:
-# A pair becomes a VALID SHARKED POSITIVE SAMPLE only
-# when this rule successfully creates its marker.
+# This does NOT determine Shark validity.
+# It only establishes the dependency on Step 14B.
 # ============================================================
-rule validate_sharked_positive:
-    input:
-        r1=f"{SHARKED_POS}/{{pair_id}}_sharked_read1.fq",
-        r2=f"{SHARKED_POS}/{{pair_id}}_sharked_read2.fq"
-    output:
-        marker=f"{SHARKED_MANIFEST_DIR}/positive_{{pair_id}}.sharked.valid.done"
 
-    shell:
-        r"""
-        set -euo pipefail
-
-        mkdir -p "{SHARKED_MANIFEST_DIR}"
-
-        echo "Validating positive Sharked pair:"
-        echo "{wildcards.pair_id}"
-
-        if [[ ! -f "{input.r1}" || ! -f "{input.r2}" ]]; then
-            echo "ERROR: Missing Sharked FASTQ pair" >&2
-            rm -f "{input.r1}" "{input.r2}"
-            exit 1
-        fi
-
-        if [[ ! -s "{input.r1}" || ! -s "{input.r2}" ]]; then
-            echo "ERROR: Empty Sharked FASTQ pair" >&2
-            rm -f "{input.r1}" "{input.r2}"
-            exit 1
-        fi
-
-        echo "Valid positive Sharked pair."
-
-        touch "{output.marker}"
-        """
-
-
-# ============================================================
-# STEP 14E: Validate Sharked negative FASTQ pairs
-# ============================================================
-rule validate_sharked_negative:
-    input:
-        r1=f"{SHARKED_NEG}/{{pair_id}}_sharked_read1.fq",
-        r2=f"{SHARKED_NEG}/{{pair_id}}_sharked_read2.fq"
-    output:
-        marker=f"{SHARKED_MANIFEST_DIR}/negative_{{pair_id}}.sharked.valid.done"
-
-    shell:
-        r"""
-        set -euo pipefail
-
-        mkdir -p "{SHARKED_MANIFEST_DIR}"
-
-        echo "Validating negative Sharked pair:"
-        echo "{wildcards.pair_id}"
-
-        if [[ ! -f "{input.r1}" || ! -f "{input.r2}" ]]; then
-            echo "ERROR: Missing Sharked FASTQ pair" >&2
-            rm -f "{input.r1}" "{input.r2}"
-            exit 1
-        fi
-
-        if [[ ! -s "{input.r1}" || ! -s "{input.r2}" ]]; then
-            echo "ERROR: Empty Sharked FASTQ pair" >&2
-            rm -f "{input.r1}" "{input.r2}"
-            exit 1
-        fi
-
-        echo "Valid negative Sharked pair."
-
-        touch "{output.marker}"
-        """
-
-
-# ============================================================
-# STEP 14F: Build lists of VALID SHARKED samples
-#
-# IMPORTANT:
-# These lists come from the validate_sharked_* rules,
-# NOT directly from the validated diploid manifests.
-#
-# Therefore:
-#
-# POSITIVE_SHARKED_SAMPLES
-#     <- validate_sharked_positive markers
-#
-# NEGATIVE_SHARKED_SAMPLES
-#     <- validate_sharked_negative markers
-# ============================================================
-def positive_sharked_valid_markers(wildcards):
+def sharked_positive_status_outputs(wildcards):
     pair_ids = validated_positive_pair_ids(wildcards)
     return [
-        f"{SHARKED_MANIFEST_DIR}/positive_{pair_id}.sharked.valid.done"
+        f"{SHARKED_POS}/{pair_id}.shark.status"
         for pair_id in pair_ids
     ]
 
-def negative_sharked_valid_markers(wildcards):
+
+# ============================================================
+# STEP 14E-PREP:
+# Determine the Shark status outputs that must exist for all
+# negative pairs selected by Step 13.
+# ============================================================
+
+def sharked_negative_status_outputs(wildcards):
     pair_ids = validated_negative_pair_ids(wildcards)
     return [
-        f"{SHARKED_MANIFEST_DIR}/negative_{pair_id}.sharked.valid.done"
+        f"{SHARKED_NEG}/{pair_id}.shark.status"
         for pair_id in pair_ids
     ]
 
 
 # ============================================================
-# STEP 14G: Create validated positive Sharked manifest
+# STEP 14D:
+# Build manifest of positive Sharking results.
 #
-# The manifest is built ONLY from successfully completed
-# validate_sharked_positive markers.
+# Every pair selected by Step 13 is represented here because
+# every pair must have a .shark.status file.
 #
-# It does NOT independently rediscover validity.
+# The manifest is NOT yet a validated manifest.
 # ============================================================
+
 rule make_positive_sharked_manifest:
     input:
-        valid=positive_sharked_valid_markers
+        status=sharked_positive_status_outputs
     output:
-        manifest=SHARKED_POS_MANIFEST
+        manifest=f"{SHARKED_MANIFEST_DIR}/positive_sharked_pairs.tsv"
 
     shell:
         r"""
-        set -euo pipefail
+        set -u
 
         mkdir -p "$(dirname "{output.manifest}")"
 
-        echo -e "ID\tR1\tR2\ttype" > "{output.manifest}"
+        echo -e "ID\tR1\tR2\tstatus" > "{output.manifest}"
 
-        for marker in {input.valid}; do
+        for status_file in {input.status}; do
 
-            pair_id=$(basename "$marker" .sharked.valid.done)
-            pair_id="${{pair_id#positive_}}"
+            pair_id=$(basename "$status_file" .shark.status)
 
             r1="{SHARKED_POS}/${{pair_id}}_sharked_read1.fq"
             r2="{SHARKED_POS}/${{pair_id}}_sharked_read2.fq"
 
-            # Defensive check:
-            # the marker is the validity checkpoint, but make sure
-            # the corresponding files still exist.
-            if [[ ! -s "$r1" || ! -s "$r2" ]]; then
-                echo "ERROR: Sharked marker exists but FASTQ is missing:" >&2
-                echo "$pair_id" >&2
-                exit 1
-            fi
+            status=$(tr -d '[:space:]' < "$status_file")
 
-            echo -e "${{pair_id}}\t${{r1}}\t${{r2}}\tpos" \
+            echo -e "${{pair_id}}\t${{r1}}\t${{r2}}\t${{status}}" \
                 >> "{output.manifest}"
+
         done
 
         echo "Created positive Sharked manifest:"
@@ -1297,44 +1317,36 @@ rule make_positive_sharked_manifest:
 
 
 # ============================================================
-# STEP 14H: Create validated negative Sharked manifest
-#
-# The manifest is built ONLY from successfully completed
-# validate_sharked_negative markers.
-#
-# It does NOT independently rediscover validity.
+# STEP 14E:
+# Build manifest of negative Sharking results.
 # ============================================================
+
 rule make_negative_sharked_manifest:
     input:
-        valid=negative_sharked_valid_markers
+        status=sharked_negative_status_outputs
     output:
-        manifest=SHARKED_NEG_MANIFEST
+        manifest=f"{SHARKED_MANIFEST_DIR}/negative_sharked_pairs.tsv"
 
     shell:
         r"""
-        set -euo pipefail
+        set -u
 
         mkdir -p "$(dirname "{output.manifest}")"
 
-        echo -e "ID\tR1\tR2\ttype" > "{output.manifest}"
+        echo -e "ID\tR1\tR2\tstatus" > "{output.manifest}"
 
-        for marker in {input.valid}; do
+        for status_file in {input.status}; do
 
-            pair_id=$(basename "$marker" .sharked.valid.done)
-            pair_id="${{pair_id#negative_}}"
+            pair_id=$(basename "$status_file" .shark.status)
 
             r1="{SHARKED_NEG}/${{pair_id}}_sharked_read1.fq"
             r2="{SHARKED_NEG}/${{pair_id}}_sharked_read2.fq"
 
-            # Defensive check:
-            if [[ ! -s "$r1" || ! -s "$r2" ]]; then
-                echo "ERROR: Sharked marker exists but FASTQ is missing:" >&2
-                echo "$pair_id" >&2
-                exit 1
-            fi
+            status=$(tr -d '[:space:]' < "$status_file")
 
-            echo -e "${{pair_id}}\t${{r1}}\t${{r2}}\tneg" \
+            echo -e "${{pair_id}}\t${{r1}}\t${{r2}}\t${{status}}" \
                 >> "{output.manifest}"
+
         done
 
         echo "Created negative Sharked manifest:"
@@ -1343,12 +1355,69 @@ rule make_negative_sharked_manifest:
 
 
 # ============================================================
-# STEP 15A: Create KMC sample manifest
+# STEP 14F:
+# Validate actual positive Sharked FASTQ pairs.
+#
+# A pair is retained ONLY if:
+#
+#   1. Shark status == OK
+#   2. R1 exists
+#   3. R2 exists
+#   4. R1 is non-empty
+#   5. R2 is non-empty
+#
+# Invalid pairs are removed from the validated manifest.
 # ============================================================
+
+checkpoint validate_positive_sharked:
+    input:
+        manifest=f"{SHARKED_MANIFEST_DIR}/positive_sharked_pairs.tsv"
+    output:
+        manifest=f"{SHARKED_MANIFEST_DIR}/positive_sharked_pairs.validated.tsv"
+
+    shell:
+        r"""
+        set -euo pipefail
+
+        "{NEAT_PYTHON}" "{SCRIPTS}/validate_sharked_pairs.py" \
+            --input-manifest "{input.manifest}" \
+            --output-manifest "{output.manifest}" \
+            --type pos
+        """
+
+
+# ============================================================
+# STEP 14G:
+# Validate actual negative Sharked FASTQ pairs.
+# ============================================================
+
+checkpoint validate_negative_sharked:
+    input:
+        manifest=f"{SHARKED_MANIFEST_DIR}/negative_sharked_pairs.tsv"
+    output:
+        manifest=f"{SHARKED_MANIFEST_DIR}/negative_sharked_pairs.validated.tsv"
+
+    shell:
+        r"""
+        set -euo pipefail
+
+        "{NEAT_PYTHON}" "{SCRIPTS}/validate_sharked_pairs.py" \
+            --input-manifest "{input.manifest}" \
+            --output-manifest "{output.manifest}" \
+            --type neg
+        """
+
+
+# ============================================================
+# STEP 15A: Create KMC sample manifest
+#
+# ONLY Sharked pairs that passed Step 14F/14G enter here.
+# ============================================================
+
 checkpoint make_kmc_sample_manifest:
     input:
-        positive=SHARKED_POS_MANIFEST,
-        negative=SHARKED_NEG_MANIFEST
+        positive=f"{SHARKED_MANIFEST_DIR}/positive_sharked_pairs.validated.tsv",
+        negative=f"{SHARKED_MANIFEST_DIR}/negative_sharked_pairs.validated.tsv"
     output:
         manifest=KMC_SAMPLE_MANIFEST
 
@@ -1371,6 +1440,7 @@ checkpoint make_kmc_sample_manifest:
 # ============================================================
 # STEP 15B: KMC Samples
 # ============================================================
+
 def get_kmc_samples(wildcards):
     checkpoint_result = checkpoints.make_kmc_sample_manifest.get()
     manifest = checkpoint_result.output.manifest
@@ -1404,6 +1474,7 @@ def get_kmc_samples(wildcards):
 # ============================================================
 # STEP 15C: KMC counting rule
 # ============================================================
+
 rule kmc_count:
     input:
         manifest=KMC_SAMPLE_MANIFEST
@@ -1550,6 +1621,7 @@ rule kmc_count:
 # ============================================================
 # STEP 15D: Collect KMC outputs for each k-mer length
 # ============================================================
+
 def kmc_outputs_for_k(wildcards):
     samples = get_kmc_samples(wildcards)
 
@@ -1562,6 +1634,7 @@ def kmc_outputs_for_k(wildcards):
 # ============================================================
 # STEP 15E: Combine KMC outputs for each k-mer length
 # ============================================================
+
 rule combine_kmc:
     input:
         kmc_outputs_for_k
@@ -1595,6 +1668,7 @@ rule combine_kmc:
 # ============================================================
 # TARGET RULE
 # ============================================================
+
 rule all:
     input:
         KMER_TABLE + "/kmerCombinedUnmerged23.csv",
