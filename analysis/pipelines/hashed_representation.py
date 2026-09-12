@@ -111,19 +111,6 @@ print(f"Number of features in test dataset before alignment: {len(X_test.columns
 
 # Align features
 features = X_train_orig.columns
-
-##
-
-# key_path = os.path.join(RES_DIR, "secret.key")
-
-# if not os.path.exists(key_path):
-#     with open(key_path, "wb") as f:
-#         f.write(secrets.token_bytes(32))
-
-# with open(key_path, "rb") as f:
-#     SECRET_KEY = f.read()
-    
-##    
         
 with open(os.path.join(RES_DIR, "secret.key"), "wb") as f:
     f.write(secrets.token_bytes(32))

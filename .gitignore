@@ -20,3 +20,8 @@ env/
 # Log files
 *.log
 
+# R
+.Rhistory
+.RData
+.Rproj.user/
+
