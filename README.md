@@ -203,6 +203,8 @@ This repository provides the computational implementation supporting the MSc the
 
 The dissertation provides the detailed methodological rationale, experimental design, parameter choices, results, and interpretation. This repository is intended to provide the corresponding computational workflows and reproducibility information.
 
+The thesis was undertaken as part of the MSc Bioinformatics programme at University of Potsdam and conducted at Robert Koch Institute, Berlin, in collaboration with Sorbonne University, Paris. 
+
 ## Data
 
 The repository contains the code required to generate the simulated data and to perform the downstream analyses using simulated and, where applicable, real sequencing data.
